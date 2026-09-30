@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisCyclone - Cyclone Impact & Infrastructure Vulnerability Forecaster</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#070b14',
+                        darkCard: '#0f172a',
+                        darkBorder: '#1e293b',
+                        accentBlue: '#0284c7',
+                        accentCyan: '#06b6d4',
+                        accentRed: '#ef4444',
+                        accentOrange: '#f97316',
+                        accentYellow: '#eab308',
+                        accentGreen: '#10b981',
+                        accentPurple: '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Three.js for 3D Globe Intro & Zoom Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- html2pdf for directive exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-base: #060911;
+            --panel-bg: rgba(15, 23, 42, 0.88);
+            --panel-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Perfectly Symmetrical Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1120;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        .leaflet-container {
+            background: #080d1a !important;
+        }
+
+        .pulse-marker {
+            animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
+            70% { transform: scale(1.15); box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .cyclone-spin {
+            animation: spin 6s linear infinite;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--panel-border);
+        }
+
+        .glass-panel-sub {
+            background: rgba(11, 17, 32, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* 3D Globe Intro Transition Styles */
+        #globeLoadingScreen {
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #globeLoadingScreen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.08);
+        }
+
+        /* Scanning radar grid effect */
+        .radar-scan-line {
+            background: linear-gradient(180deg, rgba(6, 182, 212, 0) 0%, rgba(6, 182, 212, 0.3) 50%, rgba(6, 182, 212, 0) 100%);
+            animation: scanline 4s linear infinite;
+        }
+        @keyframes scanline {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- ======================================================= -->
+    <!-- 3D GLOBE LOADING & CINEMATIC ZOOM INTRO OVERLAY         -->
+    <!-- ======================================================= -->
+    <div id="globeLoadingScreen" class="fixed inset-0 z-[9999] bg-[#030712] flex flex-col items-center justify-between p-6 overflow-hidden select-none">
+
+        <!-- Background WebGL 3D Globe Canvas -->
+        <div id="threeGlobeContainer" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
+
+        <!-- High-res Satellite Relief Backdrop for Zoom Target (India Subcontinent) -->
+        <div id="satelliteIndiaZoomLayer" class="absolute inset-0 z-[1] opacity-0 pointer-events-none transition-opacity duration-700 bg-cover bg-center" style="background-image: url('UI/01eee1a53c567850e168e54955b29585.jpg');">
+            <div class="absolute inset-0 bg-cyan-950/20 mix-blend-overlay"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-[#030712]/80"></div>
+        </div>
+
+        <!-- Scanning Line Overlay -->
+        <div class="absolute inset-0 z-[2] pointer-events-none overflow-hidden opacity-30">
+            <div class="absolute w-full h-32 radar-scan-line"></div>
+        </div>
+
+        <!-- Top Telemetry Header -->
+        <div class="relative z-10 w-full max-w-6xl flex items-center justify-between border-b border-cyan-500/20 pb-4 backdrop-blur-sm bg-gray-950/40 px-6 py-3 rounded-2xl border border-white/5">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 text-white">
+                    <i data-lucide="globe" class="w-6 h-6 animate-pulse"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-gray-200 to-cyan-400 bg-clip-text text-transparent">AegisCyclone</span>
+                        <span class="px-2 py-0.5 text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-full tracking-wider uppercase">Global Sat Recon</span>
+                    </div>
+                    <p class="text-xs text-gray-400">Anticipatory Multi-Hazard Vulnerability & AI SLOSH Modeling</p>
+                </div>
+            </div>
+
+            <!-- Orbit & Telemetry Badges -->
+            <div class="hidden md:flex items-center space-x-3 font-mono text-xs">
+                <div class="bg-gray-900/80 px-3 py-1.5 rounded-lg border border-gray-800 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-gray-300">TARGET: <strong class="text-cyan-400">INDIAN OCEAN & BAY OF BENGAL</strong></span>
+                </div>
+                <div class="bg-gray-900/80 px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">
+                    LAT: <span class="text-cyan-300">20.81°N</span> | LON: <span class="text-cyan-300">86.97°E</span>
+                </div>
+            </div>
+
+            <!-- Skip Button -->
+            <button onclick="zoomToIndiaAndEnter()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition flex items-center gap-2 border border-white/10 backdrop-blur-md">
+                <span>Enter Dashboard</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Center Hero Typography & Target Telemetry -->
+        <div class="relative z-10 text-center max-w-2xl mx-auto space-y-4 pointer-events-none">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs font-mono tracking-widest uppercase">
+                <i data-lucide="crosshair" class="w-3.5 h-3.5 animate-spin text-cyan-400"></i>
+                <span>Deep Convection & Storm Surge Spatial Intelligence</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                Anticipate Cyclone Landfall <br>
+                <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">Across the Indian Coastline</span>
+            </h1>
+
+            <p class="text-xs sm:text-sm text-gray-300 font-normal leading-relaxed max-w-xl mx-auto">
+                Real-time coupling of <strong>Google Earth Engine (GEE)</strong> satellite feeds, <strong>NASA GIBS VIIRS</strong> radar, <strong>Open-Meteo</strong> direct meteorology, and <strong>CEA Overpass</strong> national power grid vulnerability.
+            </p>
+        </div>
+
+        <!-- Bottom Action Dock with Launch Controls -->
+        <div class="relative z-10 w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-cyan-500/20 pt-4 backdrop-blur-sm bg-gray-950/40 px-6 py-3 rounded-2xl border border-white/5">
+            <!-- Systems Status -->
+            <div class="flex items-center space-x-4 text-xs font-mono text-gray-400">
+                <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i> GEE Active</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i> Open-Meteo Direct</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i> Overpass India Grid</span>
+            </div>
+
+            <!-- Primary Launch CTA -->
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+                <button onclick="zoomToIndiaAndEnter()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]">
+                    <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                    <span>Initialize Geospatial Center</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- MAIN APPLICATION WORKSPACE                              -->
+    <!-- ======================================================= -->
+
+    <!-- Symmetrical Top Navigation Header -->
+    <header class="bg-[#0b1120]/95 border-b border-gray-800/80 sticky top-0 z-50 backdrop-blur-md px-4 py-2.5">
+        <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-3">
+
+            <!-- Left Brand Identity -->
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-cyan-500/20 text-white font-bold">
+                    <i data-lucide="waves" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-base tracking-tight text-white">AegisCyclone</span>
+                        <span class="px-2 py-0.5 text-[9px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-full tracking-wider uppercase">Track 5 Forecaster</span>
+                    </div>
+                    <p class="text-[11px] text-gray-400">Bay of Bengal & Coastal APAC Anticipatory Risk Engine</p>
+                </div>
+            </div>
+
+            <!-- Center Scenario Selector & System Telemetry -->
+            <div class="flex items-center space-x-3 flex-wrap">
+                <div class="flex items-center space-x-2 bg-gray-900/90 px-3 py-1.5 rounded-lg border border-gray-800">
+                    <i data-lucide="cloud-lightning" class="w-4 h-4 text-cyan-400"></i>
+                    <label for="scenarioSelect" class="text-xs text-gray-300 font-medium">Scenario:</label>
+                    <select id="scenarioSelect" class="bg-gray-800 text-cyan-300 text-xs font-semibold rounded px-2 py-1 border border-gray-700 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        <option value="cyclone_dana" selected>Cyclone Dana (2024 - Odisha / WB Coast)</option>
+                        <option value="cyclone_amphan">Super Cyclone Amphan (Sundarbans / WB)</option>
+                        <option value="cyclone_michaung">Cyclone Michaung (Chennai / AP Coast)</option>
+                        <option value="custom_sim">Custom Real-Time Physics Simulator</option>
+                    </select>
+                </div>
+
+                <div class="hidden xl:flex items-center space-x-2 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-[11px] font-mono text-emerald-300 font-semibold tracking-wide">NASA & OPEN-METEO ONLINE</span>
+                </div>
+            </div>
+
+            <!-- Right Action Toolbar (Symmetrical Control Group) -->
+            <div class="flex items-center space-x-2">
+                <!-- Re-open 3D Satellite Globe Button -->
+                <button onclick="reopen3DGlobeView()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition shadow-sm" title="Open 3D Satellite Earth View">
+                    <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
+                    <span>3D Satellite Globe</span>
+                </button>
+
+                <!-- API Key Manager Modal Trigger -->
+                <button onclick="openApiModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-medium transition shadow-sm" title="Manage Map, Gemini, NASA, and Aviation API Keys">
+                    <i data-lucide="key" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span>API Keys</span>
+                </button>
+
+                <!-- Parametric Insurance Modal Trigger -->
+                <button onclick="openParametricModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition shadow-sm">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Parametric Pool</span>
+                </button>
+
+                <!-- Dispatch Directive PDF Export -->
+                <button onclick="exportEmergencyBulletinPDF()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/30 text-xs font-semibold transition shadow-sm">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">PDF Directive</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ======================================================= -->
+    <!-- MAIN SYMMETRICAL WORKSPACE (3-COLUMN BALANCED SYSTEM)   -->
+    <!-- ======================================================= -->
+    <main class="flex-1 max-w-[1920px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
+
+        <!-- ======================================================= -->
+        <!-- LEFT COLUMN: SURGE PHYSICS & INFRASTRUCTURE (3.5 Cols)   -->
+        <!-- ======================================================= -->
+        <div class="lg:col-span-4 xl:col-span-3 flex flex-col space-y-3">
+
+            <!-- Symmetrical Segmented Tab Navigation for Left Column -->
+            <div class="glass-panel p-1 rounded-xl flex items-center border border-gray-800">
+                <button id="leftTabSurgeBtn" onclick="switchLeftTab('surge')" class="flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 bg-cyan-600/20 text-cyan-300 border border-cyan-500/40">
+                    <i data-lucide="waves" class="w-3.5 h-3.5"></i> Surge Physics
+                </button>
+                <button id="leftTabGridBtn" onclick="switchLeftTab('grid')" class="flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-200">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i> Power Grid
+                </button>
+                <button id="leftTabAssetsBtn" onclick="switchLeftTab('assets')" class="flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-200">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> Asset Matrix
+                </button>
+            </div>
+
+            <!-- Storm Telemetry Summary Card (Always Visible) -->
+            <div class="glass-panel p-3.5 rounded-xl shadow-lg relative overflow-hidden border border-gray-800">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Storm Telemetry</span>
+                        <span id="stormCategoryBadge" class="px-2 py-0.5 text-[10px] font-extrabold bg-red-500/20 text-red-400 border border-red-500/40 rounded">VSCS (Cat 3)</span>
+                    </div>
+                    <i data-lucide="disc-3" class="w-4 h-4 text-cyan-400 cyclone-spin"></i>
+                </div>
+
+                <div class="flex items-baseline justify-between">
+                    <h2 id="stormNameHeader" class="text-lg font-bold text-white">Cyclone DANA</h2>
+                    <span id="stormRegionText" class="text-xs text-gray-400 flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-3 h-3 text-cyan-400"></i> Odisha / WB Coast
+                    </span>
+                </div>
+
+                <!-- 2x2 Telemetry Grid -->
+                <div class="grid grid-cols-2 gap-2 mt-2.5 font-mono text-xs">
+                    <div class="glass-panel-sub p-2 rounded-lg">
+                        <div class="text-[9px] uppercase text-gray-400 mb-0.5">Central Pressure</div>
+                        <div id="statPressure" class="text-base font-bold text-cyan-400">980 <span class="text-[10px] font-normal text-gray-400">hPa</span></div>
+                    </div>
+                    <div class="glass-panel-sub p-2 rounded-lg">
+                        <div class="text-[9px] uppercase text-gray-400 mb-0.5">Max Wind Speed</div>
+                        <div id="statWind" class="text-base font-bold text-amber-400">125 <span class="text-[10px] font-normal text-gray-400">km/h</span></div>
+                    </div>
+                    <div class="glass-panel-sub p-2 rounded-lg">
+                        <div class="text-[9px] uppercase text-gray-400 mb-0.5">Peak Surge Height</div>
+                        <div id="statSurge" class="text-base font-bold text-red-400">2.4 <span class="text-[10px] font-normal text-gray-400">m</span></div>
+                    </div>
+                    <div class="glass-panel-sub p-2 rounded-lg">
+                        <div class="text-[9px] uppercase text-gray-400 mb-0.5">24h Rainfall Total</div>
+                        <div id="statRain" class="text-base font-bold text-blue-400">280 <span class="text-[10px] font-normal text-gray-400">mm</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEFT TAB 1: HYDRODYNAMICS & SLOSH SURGE CONTROLS -->
+            <div id="leftTabSurgeContent" class="space-y-3 flex-1 flex flex-col">
+                <!-- SLOSH Hydrodynamic Sliders -->
+                <div class="glass-panel p-3.5 rounded-xl shadow-lg border border-gray-800 space-y-3">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-1.5">
+                            <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i> SLOSH Hydrodynamic Controls
+                        </span>
+                        <span class="text-[10px] text-cyan-400 font-mono">Dynamic Calibrator</span>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">Barometric Pressure (&Delta;P)</span>
+                            <span id="valPressureLabel" class="font-mono text-cyan-400 font-bold">980 hPa</span>
+                        </div>
+                        <input id="inputPressure" type="range" min="900" max="1010" value="980" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-400" oninput="updatePhysicsSimulation()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">Max Sustained Wind (W)</span>
+                            <span id="valWindLabel" class="font-mono text-amber-400 font-bold">125 km/h</span>
+                        </div>
+                        <input id="inputWind" type="range" min="60" max="280" value="125" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-amber-400" oninput="updatePhysicsSimulation()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">Astronomical Tide Offset</span>
+                            <span id="valTideLabel" class="font-mono text-blue-400 font-bold">+1.4 m</span>
+                        </div>
+                        <input id="inputTide" type="range" min="0.0" max="3.5" step="0.1" value="1.4" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-400" oninput="updatePhysicsSimulation()">
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-800 flex justify-between items-center text-xs">
+                        <span class="text-gray-400">Estimated Inundation Extent:</span>
+                        <span id="valInlandExtent" class="font-mono font-bold text-red-400">~6.8 km Inland</span>
+                    </div>
+                </div>
+
+                <!-- Coastal Elevation Transect Profile (Chart.js) -->
+                <div class="glass-panel p-3.5 rounded-xl shadow-lg flex-1 flex flex-col border border-gray-800 min-h-[190px]">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-1.5">
+                            <i data-lucide="trending-up" class="w-4 h-4 text-cyan-400"></i> Coastal Inundation Transect
+                        </span>
+                        <span class="text-[10px] text-gray-400 font-mono">Coast &rarr; 15km Inland</span>
+                    </div>
+                    <div class="flex-1 relative w-full h-full min-h-[140px]">
+                        <canvas id="transectChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEFT TAB 2: OVERPASS POWER GRID & SUBSTATIONS -->
+            <div id="leftTabGridContent" class="space-y-3 flex-1 flex flex-col hidden">
+                <div class="glass-panel p-3.5 rounded-xl shadow-lg border border-gray-800 flex-1 flex flex-col space-y-3">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Indian Power Grid (Overpass)
+                        </span>
+                        <button onclick="openOverpassModal()" class="text-[10px] text-amber-300 font-bold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/40 hover:bg-amber-900">
+                            QL Editor &rarr;
+                        </button>
+                    </div>
+
+                    <div class="space-y-2 text-xs font-mono">
+                        <div class="p-2.5 rounded-lg bg-purple-950/30 border border-purple-500/30 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-purple-400 shadow"></span>
+                                <span class="text-gray-200">765kV UHV Backbone</span>
+                            </div>
+                            <span class="text-purple-300 font-bold">5 Lines (Low Risk)</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-rose-950/30 border border-rose-500/30 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-rose-500 shadow"></span>
+                                <span class="text-gray-200">400kV EHV Trunk</span>
+                            </div>
+                            <span class="text-rose-300 font-bold">8 Lines (Moderate)</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-amber-950/30 border border-amber-500/30 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-amber-400 shadow"></span>
+                                <span class="text-gray-200">220kV Regional Grid</span>
+                            </div>
+                            <span class="text-amber-300 font-bold">6 Lines (High Risk)</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-500/30 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-cyan-400 shadow"></span>
+                                <span class="text-gray-200">132kV Sub-Transmission</span>
+                            </div>
+                            <span class="text-cyan-300 font-bold">4 Lines (Extreme)</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-gray-900/90 border border-gray-800 text-[11px] text-gray-300 space-y-1.5">
+                        <div class="font-bold text-amber-400 flex items-center gap-1">
+                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Coastal Substation Fragility:
+                        </div>
+                        <p class="text-gray-400 leading-relaxed">
+                            Substations in <strong>Dhamra (220kV)</strong> and <strong>Paradeep (400kV)</strong> have basement switchgear below the +2.4m surge inundation threshold.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEFT TAB 3: CRITICAL ASSET VULNERABILITY MATRIX -->
+            <div id="leftTabAssetsContent" class="space-y-3 flex-1 flex flex-col hidden">
+                <div class="glass-panel p-3.5 rounded-xl shadow-lg border border-gray-800 flex-1 flex flex-col space-y-2">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-1.5">
+                            <i data-lucide="shield" class="w-4 h-4 text-cyan-400"></i> Critical Infrastructure Nodes
+                        </span>
+                        <span class="text-[10px] text-emerald-400 font-mono">8 Monitored</span>
+                    </div>
+                    <div id="infraCardsContainer" class="space-y-2 text-xs overflow-y-auto max-h-[360px]">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- CENTER COLUMN: INTERACTIVE GIS MAP & WEATHER HUD (5.5 Cols) -->
+        <!-- ======================================================= -->
+        <div class="lg:col-span-5 xl:col-span-6 flex flex-col space-y-3">
+
+            <!-- Primary Map Stage Container -->
+            <div class="glass-panel rounded-xl shadow-lg relative flex-1 min-h-[580px] overflow-hidden flex flex-col border border-gray-800">
+
+                <!-- Symmetrical Categorized GIS Layer Toolbar -->
+                <div class="bg-gray-900/95 border-b border-gray-800 p-2 flex flex-wrap items-center justify-between gap-2 z-10">
+                    <!-- Layer Pills Group -->
+                    <div class="flex items-center space-x-1.5 overflow-x-auto text-xs py-0.5">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mr-1">Layers:</span>
+
+                        <button id="layerSurgeBtn" onclick="toggleMapLayer('surge')" class="px-2.5 py-1 rounded-md text-xs font-medium bg-red-600/30 text-red-300 border border-red-500/40 flex items-center gap-1 transition">
+                            <i data-lucide="waves" class="w-3.5 h-3.5"></i> Surge Inundation
+                        </button>
+
+                        <button id="layerWeatherBtn" onclick="toggleMapLayer('weather')" class="px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 transition shadow-sm">
+                            <i data-lucide="cloud-rain" class="w-3.5 h-3.5"></i> Open-Meteo (WMO)
+                        </button>
+
+                        <button id="layerOverpassBtn" onclick="toggleMapLayer('overpass_grid')" class="px-2.5 py-1 rounded-md text-xs font-medium bg-amber-500/40 text-amber-200 border border-amber-400/60 flex items-center gap-1 transition shadow-sm">
+                            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i> India Grid (765kV)
+                        </button>
+
+                        <button id="layerRoadsBtn" onclick="toggleMapLayer('roads')" class="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-600/30 text-blue-300 border border-blue-500/40 flex items-center gap-1 transition">
+                            <i data-lucide="git-commit" class="w-3.5 h-3.5"></i> Evac Roads
+                        </button>
+
+                        <button id="layerSheltersBtn" onclick="toggleMapLayer('shelters')" class="px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 transition">
+                            <i data-lucide="home" class="w-3.5 h-3.5"></i> Shelters
+                        </button>
+
+                        <button id="layerFlightsBtn" onclick="toggleMapLayer('flights')" class="px-2.5 py-1 rounded-md text-xs font-medium bg-sky-600/30 text-sky-300 border border-sky-500/40 flex items-center gap-1 transition">
+                            <i data-lucide="plane" class="w-3.5 h-3.5"></i> Flights & NOTAM
+                        </button>
+                    </div>
+
+                    <!-- Right Quick Tools -->
+                    <div class="flex items-center space-x-1.5">
+                        <!-- WMO Code Guide Modal Trigger -->
+                        <button onclick="openWmoModal()" class="flex items-center gap-1 bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-500/50 px-2 py-1 rounded text-xs font-semibold text-emerald-300 transition" title="Open WMO Weather Interpretation Codes Table">
+                            <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-emerald-400"></i>
+                            <span>WMO Guide</span>
+                        </button>
+
+                        <!-- Basemap Switcher -->
+                        <select id="baseMapSelect" onchange="switchBaseMap(this.value)" class="bg-gray-800 text-cyan-300 text-xs rounded border border-gray-700 px-2 py-1 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                            <option value="dark">🌑 Dark Matter GIS</option>
+                            <option value="nasa_gibs">🛰️ NASA GIBS VIIRS TrueColor</option>
+                            <option value="google_sat">🌍 Google Earth Satellite</option>
+                            <option value="google_terrain">⛰️ Google Terrain</option>
+                            <option value="satellite">🛰️ ESRI World Imagery</option>
+                            <option value="osm">🗺️ OpenStreetMap</option>
+                        </select>
+
+                        <button onclick="recenterMap()" title="Recenter on Landfall" class="p-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
+                            <i data-lucide="crosshair" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Leaflet Map Canvas -->
+                <div id="map" class="flex-1 w-full h-full relative z-0"></div>
+
+                <!-- Floating Open-Meteo Weather HUD (Docked Top-Right) -->
+                <div id="weatherHudBar" class="absolute top-3 left-12 right-3 md:left-auto md:right-3 bg-gray-950/95 backdrop-blur-md p-2.5 rounded-xl border border-emerald-500/40 shadow-2xl z-[400] text-xs font-mono max-w-xl pointer-events-auto transition-all">
+                    <div class="flex items-center justify-between gap-3 mb-1.5 border-b border-gray-800 pb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                            </span>
+                            <span class="font-bold text-white flex items-center gap-1">
+                                <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span id="weatherStationName">Dhamra Coastal Weather Hub</span>
+                            </span>
+                            <span id="weatherCoordsLabel" class="text-[10px] text-gray-400 font-mono">20.81°N, 86.97°E</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="wmoCodeBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/50 flex items-center gap-1">
+                                <span id="wmoCodeText">WMO 0: Clear sky</span>
+                            </span>
+                            <button onclick="refreshCurrentWeather()" title="Fetch Latest Open-Meteo Observations" class="p-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition">
+                                <i data-lucide="refresh-cw" class="w-3 h-3 text-emerald-400"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
+                        <div class="bg-gray-900/90 p-1.5 rounded-lg border border-gray-800">
+                            <div class="text-[9px] text-gray-400 flex items-center justify-center gap-1"><i data-lucide="thermometer" class="w-2.5 h-2.5 text-rose-400"></i> Temperature</div>
+                            <div id="liveTempDisplay" class="font-bold text-rose-300 text-sm">28.4°C</div>
+                            <div id="liveApparentTemp" class="text-[9px] text-gray-400">Feels: 34.2°C</div>
+                        </div>
+                        <div class="bg-gray-900/90 p-1.5 rounded-lg border border-gray-800">
+                            <div class="text-[9px] text-gray-400 flex items-center justify-center gap-1"><i data-lucide="cloud-drizzle" class="w-2.5 h-2.5 text-blue-400"></i> Rain & Precip</div>
+                            <div id="liveRainDisplay" class="font-bold text-blue-300 text-sm">0.0 <span class="text-[9px] font-normal text-gray-400">mm</span></div>
+                            <div id="liveHumidityDisplay" class="text-[9px] text-cyan-400">RH: 76%</div>
+                        </div>
+                        <div class="bg-gray-900/90 p-1.5 rounded-lg border border-gray-800">
+                            <div class="text-[9px] text-gray-400 flex items-center justify-center gap-1"><i data-lucide="wind" class="w-2.5 h-2.5 text-teal-400"></i> Wind & Gusts</div>
+                            <div id="liveWindDisplay" class="font-bold text-teal-300 text-sm">18.5 <span class="text-[9px] font-normal text-gray-400">km/h</span></div>
+                            <div id="liveGustsDisplay" class="text-[9px] text-teal-400/80">Gust: 29.2 km/h</div>
+                        </div>
+                        <div class="bg-gray-900/90 p-1.5 rounded-lg border border-gray-800">
+                            <div class="text-[9px] text-gray-400 flex items-center justify-center gap-1"><i data-lucide="gauge" class="w-2.5 h-2.5 text-amber-400"></i> Pressure</div>
+                            <div id="livePressureDisplay" class="font-bold text-amber-300 text-sm">1008.2 <span class="text-[9px] font-normal text-gray-400">hPa</span></div>
+                            <div class="text-[9px] text-emerald-400">Open-Meteo Direct</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Symmetrical Bottom Forecast Timeline Scrubber -->
+                <div class="bg-gray-900/95 border-t border-gray-800 p-2.5 z-10">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center space-x-2">
+                            <button id="btnPlayPause" onclick="toggleTimelinePlay()" class="p-1.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/40 text-xs transition">
+                                <i id="playIcon" data-lucide="play" class="w-4 h-4"></i>
+                            </button>
+                            <span id="currentTimelineLabel" class="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">T-12h Pre-Landfall</span>
+                        </div>
+
+                        <!-- Timeline Range Slider -->
+                        <div class="flex-1 max-w-md">
+                            <input id="timelineSlider" type="range" min="0" max="6" step="1" value="3" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+                            <div class="flex justify-between text-[9px] font-mono text-gray-400 px-0.5 mt-0.5">
+                                <span>T-72h</span>
+                                <span>T-48h</span>
+                                <span>T-24h</span>
+                                <span class="text-cyan-400 font-bold">T-12h</span>
+                                <span class="text-red-400 font-bold">T-0</span>
+                                <span>T+12h</span>
+                                <span>T+24h</span>
+                            </div>
+                        </div>
+
+                        <button onclick="resetTimeline()" class="text-xs text-gray-400 hover:text-gray-200 transition">Reset</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- RIGHT COLUMN: AI ADVISORY & EVACUATION (3.5 Cols)        -->
+        <!-- ======================================================= -->
+        <div class="lg:col-span-3 xl:col-span-3 flex flex-col space-y-3">
+
+            <!-- Symmetrical Segmented Tab Navigation for Right Column -->
+            <div class="glass-panel p-1 rounded-xl flex items-center border border-gray-800">
+                <button id="rightTabAdvisoryBtn" onclick="switchRightTab('advisory')" class="flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 bg-cyan-600/20 text-cyan-300 border border-cyan-500/40">
+                    <i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Advisory
+                </button>
+                <button id="rightTabEvacBtn" onclick="switchRightTab('evac')" class="flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-200">
+                    <i data-lucide="navigation" class="w-3.5 h-3.5"></i> Evacuation
+                </button>
+                <button id="rightTabAviationBtn" onclick="switchRightTab('aviation')" class="flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-200">
+                    <i data-lucide="plane" class="w-3.5 h-3.5"></i> Airspace
+                </button>
+            </div>
+
+            <!-- RIGHT TAB 1: AI MULTIMODAL ADVISORY DISPATCH -->
+            <div id="rightTabAdvisoryContent" class="space-y-3 flex-1 flex flex-col">
+                <div class="glass-panel p-3.5 rounded-xl shadow-lg border border-gray-800 flex-1 flex flex-col space-y-3">
+
+                    <!-- Controls: Target Body & Language -->
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label class="text-[9px] text-gray-400 uppercase font-bold block mb-1">Target Body</label>
+                            <select id="advisoryAudience" onchange="refreshAdvisoryContent()" class="w-full bg-gray-900 text-gray-200 text-xs rounded p-1.5 border border-gray-700">
+                                <option value="NDRF_SDMA">NDRF & SDMA</option>
+                                <option value="MUNICIPAL_COLLECTORS">District Collectors</option>
+                                <option value="PORTS_MARITIME">Ports & Maritime</option>
+                                <option value="PUBLIC_FISHERFOLK">Public & Fisherfolk</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[9px] text-gray-400 uppercase font-bold block mb-1">Language</label>
+                            <select id="advisoryLanguage" onchange="refreshAdvisoryContent()" class="w-full bg-gray-900 text-gray-200 text-xs rounded p-1.5 border border-gray-700 font-medium">
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी (Hindi)</option>
+                                <option value="bn">বাংলা (Bengali)</option>
+                                <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                                <option value="ta">தமிழ் (Tamil)</option>
+                                <option value="te">తెలుగు (Telugu)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- AI Multimodal Reasoning Bulletin Box -->
+                    <div id="directivePrintArea" class="glass-panel-sub rounded-lg p-3 flex-1 flex flex-col space-y-2 text-xs border border-gray-800 overflow-y-auto max-h-[360px]">
+                        <div class="flex items-center justify-between pb-1.5 border-b border-gray-800">
+                            <span class="text-[10px] font-bold text-red-400 uppercase tracking-wide flex items-center gap-1">
+                                <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> Action Directive
+                            </span>
+                            <span class="text-[9px] font-mono text-gray-400" id="advisoryTimestamp">AUTO-GENERATED</span>
+                        </div>
+
+                        <h4 id="advisoryHeadline" class="font-bold text-white text-xs leading-snug">EMERGENCY ACTION DIRECTIVE: CYCLONE DANA (T-12h)</h4>
+
+                        <div id="advisoryBodyText" class="text-gray-300 leading-relaxed text-[11px] font-sans whitespace-pre-line flex-1">
+                            Loading AI multimodal reasoning and risk directives...
+                        </div>
+
+                        <!-- Parametric Insurance Banner -->
+                        <div id="advisoryParametricBadge" class="p-2 rounded bg-indigo-950/60 border border-indigo-500/40 text-[10px] text-indigo-200 font-mono">
+                            ⚡ <strong>Parametric Liquidity Trigger:</strong> BREACHED ($15M Immediate SDRF Fund Liquidity Authorized)
+                        </div>
+                    </div>
+
+                    <!-- Dispatch Action Toolbar -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="broadcastAlertSMS()" class="flex items-center justify-center space-x-1 px-2.5 py-2 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition">
+                            <i data-lucide="radio" class="w-3.5 h-3.5"></i>
+                            <span>CAP Alert SMS</span>
+                        </button>
+                        <button onclick="speakCurrentAdvisory()" class="flex items-center justify-center space-x-1 px-2.5 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition">
+                            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                            <span>Audio Readout</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- RIGHT TAB 2: EVACUATION ROUTE SOLVER -->
+            <div id="rightTabEvacContent" class="space-y-3 flex-1 flex flex-col hidden">
+                <div class="glass-panel p-3.5 rounded-xl shadow-lg border border-gray-800 flex-1 flex flex-col space-y-3">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                            <i data-lucide="navigation" class="w-4 h-4 text-cyan-400"></i> Evacuation Route Clearance
+                        </span>
+                        <span class="text-[10px] text-emerald-400 font-mono">Real-Time Routing</span>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2.5 rounded-lg bg-gray-900/90 border border-gray-800">
+                            <div class="font-bold text-gray-200 mb-1 flex items-center justify-between">
+                                <span>NH-16 Coastal Corridor</span>
+                                <span class="text-emerald-400 font-mono text-[10px]">CLEAR &bull; 0.0m Surge</span>
+                            </div>
+                            <p class="text-[11px] text-gray-400">Bhadrak to Balasore arterial bypass is elevated (+4.2m MSL) and safe for emergency convoy deployment.</p>
+                        </div>
+
+                        <div class="p-2.5 rounded-lg bg-gray-900/90 border border-gray-800">
+                            <div class="font-bold text-gray-200 mb-1 flex items-center justify-between">
+                                <span>SH-9A Dhamra Port Link</span>
+                                <span class="text-red-400 font-mono text-[10px]">IMPASSABLE &bull; +2.1m Inundation</span>
+                            </div>
+                            <p class="text-[11px] text-gray-400">KM 12-24 submerged. Reroute via Chandbali inland bridge.</p>
+                        </div>
+                    </div>
+
+                    <button onclick="calculateEvacuationRoutes()" class="w-full py-2 bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/40 rounded-lg text-xs font-bold transition">
+                        Re-evaluate All Coastal Corridors
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT TAB 3: AVIATION & AIRSPACE RADAR -->
+            <div id="rightTabAviationContent" class="space-y-3 flex-1 flex flex-col hidden">
+                <div class="glass-panel p-3.5 rounded-xl shadow-lg border border-gray-800 flex-1 flex flex-col space-y-3">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
+                            <i data-lucide="plane" class="w-4 h-4 text-sky-400"></i> Live Aviation & NOTAM
+                        </span>
+                        <span class="text-[10px] text-sky-400 font-mono">Radar Feed</span>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-sky-950/30 border border-sky-500/30 text-xs space-y-2">
+                        <div class="font-bold text-white flex items-center justify-between">
+                            <span>Bhubaneswar (BBI) & Kolkata (CCU)</span>
+                            <span class="text-amber-400 font-mono text-[10px]">NOTAM ACTIVE</span>
+                        </div>
+                        <p class="text-gray-300 text-[11px] leading-relaxed">
+                            Terminal Airspace Operations suspended for wind gusts exceeding 45 knots. Redirection to Hyderabad (HYD) and Ranchi (IXR).
+                        </p>
+                    </div>
+
+                    <div class="p-2.5 rounded-lg bg-gray-900/90 border border-gray-800 text-xs">
+                        <div class="text-gray-400 text-[10px] uppercase font-bold mb-1">Airlines API Endpoint:</div>
+                        <div class="font-mono text-sky-300 text-[11px]">Aviation Edge & FlightRadar Stream (Live)</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ======================================================= -->
+    <!-- UNIFIED MODALS & SYSTEM HUBS                            -->
+    <!-- ======================================================= -->
+
+    <!-- 1. API Keys Management Modal -->
+    <div id="apiModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-lg w-full rounded-2xl p-6 border border-gray-700 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="key" class="w-5 h-5 text-cyan-400"></i>
+                    <h3 class="text-base font-bold text-white">Geospatial API Keys Management</h3>
+                </div>
+                <button onclick="closeApiModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-gray-300 font-semibold block mb-1">Backend Server Endpoint (Render / Localhost)</label>
+                    <input id="modalBackendUrlInput" type="text" placeholder="e.g., https://whether-call-backend.onrender.com or http://127.0.0.1:8000" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-emerald-300" value="">
+                </div>
+                <div>
+                    <label class="text-gray-300 font-semibold block mb-1">Google Gemini & GEE API Key</label>
+                    <input id="modalGoogleKeyInput" type="password" placeholder="Enter Google Gemini / GEE API Key" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-cyan-300" value="">
+                </div>
+                <div>
+                    <label class="text-gray-300 font-semibold block mb-1">NASA Earthdata / GIBS API Key</label>
+                    <input id="modalNasaKeyInput" type="password" placeholder="Enter NASA Earthdata API Key" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-amber-300" value="">
+                </div>
+                <div>
+                    <label class="text-gray-300 font-semibold block mb-1">Live Airlines Aviation API Key</label>
+                    <input id="modalAviationKeyInput" type="password" placeholder="Enter Aviation API Key" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-sky-300" value="">
+                </div>
+                <div>
+                    <label class="text-gray-300 font-semibold block mb-1">Map Tiles API Key</label>
+                    <input id="modalMapKeyInput" type="password" placeholder="Enter Map API Key" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-cyan-300" value="">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-3 border-t border-gray-800">
+                <button onclick="closeApiModal()" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveApiKeysModal()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold shadow-lg shadow-cyan-600/30">Save & Synchronize</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Overpass Turbo National Grid Modal -->
+    <div id="overpassModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-2xl w-full rounded-2xl p-6 border border-amber-500/40 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+                    <h3 class="text-base font-bold text-white">Overpass Turbo - Indian Power Grid</h3>
+                </div>
+                <button onclick="closeOverpassModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <p class="text-xs text-gray-300">
+                Execute Overpass QL queries across Indian transmission corridors (765kV, 400kV, 220kV, 132kV, ±800kV HVDC).
+            </p>
+
+            <textarea id="overpassQlQueryInput" rows="6" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 font-mono text-xs text-amber-300 focus:outline-none focus:border-amber-500">[out:json][timeout:60];
+(
+  node["power"="substation"]["voltage"~"400000|765000"](8.0, 68.0, 35.5, 97.0);
+  way["power"="line"]["voltage"~"400000|765000"](8.0, 68.0, 35.5, 97.0);
+);
+out body;
+>;
+out skel qt;</textarea>
+
+            <div class="flex justify-between items-center pt-3 border-t border-gray-800">
+                <span class="text-[11px] text-gray-400 font-mono">24 EHV Substations & 20 Major Lines Preloaded</span>
+                <button onclick="executeOverpassQuery()" class="px-5 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-lg text-xs font-bold shadow-lg shadow-amber-600/30 flex items-center gap-2">
+                    <i data-lucide="play" class="w-4 h-4"></i> Run Overpass Query
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. WMO Weather Code Table Modal -->
+    <div id="wmoModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-3xl w-full rounded-2xl p-6 border border-emerald-500/40 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="cloud-sun" class="w-5 h-5 text-emerald-400"></i>
+                    <h3 class="text-base font-bold text-white">WMO Weather Interpretation Code Table (0–99)</h3>
+                </div>
+                <button onclick="closeWmoModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div id="wmoCodeListContainer" class="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs font-mono pr-1">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Parametric Insurance Liquidity Modal -->
+    <div id="parametricModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-xl w-full rounded-2xl p-6 border border-indigo-500/40 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-indigo-400"></i>
+                    <h3 class="text-base font-bold text-white">Parametric Insurance Liquidity Pool ($15M)</h3>
+                </div>
+                <button onclick="closeParametricModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-xs space-y-2">
+                <div class="flex justify-between font-bold text-white">
+                    <span>Smart Contract Status:</span>
+                    <span class="text-emerald-400">TRIGGER THRESHOLD BREACHED</span>
+                </div>
+                <p class="text-indigo-200 leading-relaxed">
+                    Verified central pressure &le; 985 hPa and surge &ge; 2.0m confirmed across IMD Dhamra buoy. Instant liquidity dispatch of <strong>$15,000,000 USD</strong> authorized to Odisha State Disaster Management Authority (OSDMA).
+                </p>
+            </div>
+
+            <div class="flex justify-end pt-3 border-t border-gray-800">
+                <button onclick="closeParametricModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold">Acknowledge Directive</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- JAVASCRIPT: THREE.JS GLOBE INTRO, LEAFLET GIS & ENGINES -->
+    <!-- ======================================================= -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Global State & Configuration
+        let threeScene, threeCamera, threeRenderer, threeGlobe, threeStars, globeAnimFrameId;
+        let isGlobeZooming = false;
+        let leafletMap, transectChartInstance;
+        let mapLayers = {
+            surge: null,
+            weather: null,
+            power: null,
+            overpass_grid: null,
+            roads: null,
+            shelters: null,
+            sar: null,
+            flights: null,
+            notam: null
+        };
+        let currentBaseTileLayer = null;
+        let isTimelinePlaying = false;
+        let timelineInterval = null;
+
+        // Current Active Weather Telemetry State
+        let currentActiveWeather = {
+            lat: 20.812,
+            lon: 86.974,
+            name: "Dhamra Coastal Weather Hub",
+            data: null
+        };
+
+        // WMO Code Table 4677 Standard Dictionary
+        const WMO_WEATHER_NOTATIONS = {
+            "0": "Clear sky",
+            "1": "Mainly clear",
+            "2": "Partly cloudy",
+            "3": "Overcast",
+            "45": "Fog",
+            "48": "Depositing rime fog",
+            "51": "Light drizzle",
+            "53": "Moderate drizzle",
+            "55": "Dense drizzle",
+            "56": "Light freezing drizzle",
+            "57": "Dense freezing drizzle",
+            "61": "Slight rain",
+            "63": "Moderate rain",
+            "65": "Heavy rain",
+            "66": "Light freezing rain",
+            "67": "Heavy freezing rain",
+            "71": "Slight snowfall",
+            "73": "Moderate snowfall",
+            "75": "Heavy snowfall",
+            "77": "Snow grains",
+            "80": "Slight rain showers",
+            "81": "Moderate rain showers",
+            "82": "Violent rain showers",
+            "85": "Slight snow showers",
+            "86": "Heavy snow showers",
+            "95": "Thunderstorm",
+            "96": "Thunderstorm with slight hail",
+            "97": "Heavy thunderstorm",
+            "99": "Thunderstorm with heavy hail"
+        };
+
+        // WMO Severity Metadata
+        const WMO_META = {
+            "0": { severity: "Normal", color: "emerald" },
+            "1": { severity: "Normal", color: "emerald" },
+            "2": { severity: "Moderate", color: "blue" },
+            "3": { severity: "Moderate", color: "blue" },
+            "45": { severity: "Warning", color: "amber" },
+            "48": { severity: "Warning", color: "amber" },
+            "51": { severity: "Moderate", color: "blue" },
+            "53": { severity: "Moderate", color: "blue" },
+            "55": { severity: "Warning", color: "amber" },
+            "61": { severity: "Moderate", color: "blue" },
+            "63": { severity: "Warning", color: "amber" },
+            "65": { severity: "Severe", color: "rose" },
+            "80": { severity: "Moderate", color: "blue" },
+            "81": { severity: "Warning", color: "amber" },
+            "82": { severity: "Severe", color: "rose" },
+            "95": { severity: "Severe", color: "rose" },
+            "96": { severity: "Critical", color: "red" },
+            "97": { severity: "Critical", color: "red" },
+            "99": { severity: "Extreme", color: "red" }
+        };
+
+        // =======================================================
+        // 1. THREE.JS 3D SPINNING GLOBE LOADING SCREEN
+        // =======================================================
+        function initThreeGlobe() {
+            const container = document.getElementById('threeGlobeContainer');
+            if (!container) return;
+
+            const width = container.clientWidth || window.innerWidth;
+            const height = container.clientHeight || window.innerHeight;
+
+            threeScene = new THREE.Scene();
+            threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            threeCamera.position.z = 240;
+
+            threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            threeRenderer.setSize(width, height);
+            threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(threeRenderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x334155, 1.2);
+            threeScene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0x38bdf8, 2.0);
+            sunLight.position.set(150, 80, 120);
+            threeScene.add(sunLight);
+
+            const backLight = new THREE.DirectionalLight(0x6366f1, 1.0);
+            backLight.position.set(-150, -80, -100);
+            threeScene.add(backLight);
+
+            // Procedural High-Res Earth Texture Canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            // Deep ocean base
+            const grad = ctx.createLinearGradient(0, 0, 0, 1024);
+            grad.addColorStop(0, '#0c2444');
+            grad.addColorStop(0.5, '#07182e');
+            grad.addColorStop(1, '#0c2444');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 2048, 1024);
+
+            // Continents outline (Procedural geographical representation)
+            ctx.fillStyle = '#1e3a5f';
+            // Asia & Indian Subcontinent
+            ctx.beginPath();
+            ctx.arc(1420, 480, 240, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Indian Peninsula Shape
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(1400, 420);
+            ctx.lineTo(1460, 450);
+            ctx.lineTo(1440, 560); // South tip
+            ctx.lineTo(1380, 480);
+            ctx.closePath();
+            ctx.fill();
+
+            // Lat/Lon Wireframe Grid on Canvas
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < 2048; x += 128) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 1024);
+                ctx.stroke();
+            }
+            for (let y = 0; y < 1024; y += 64) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(2048, y);
+                ctx.stroke();
+            }
+
+            const earthTexture = new THREE.CanvasTexture(canvas);
+
+            // Earth Sphere Mesh
+            const globeGeo = new THREE.SphereGeometry(70, 64, 64);
+            const globeMat = new THREE.MeshPhongMaterial({
+                map: earthTexture,
+                shininess: 25,
+                specular: new THREE.Color(0x0284c7),
+                emissive: new THREE.Color(0x030712)
+            });
+            threeGlobe = new THREE.Mesh(globeGeo, globeMat);
+
+            // Set initial orientation focusing on Indian Ocean / Bay of Bengal
+            threeGlobe.rotation.y = -Math.PI * 0.72;
+            threeGlobe.rotation.x = 0.25;
+            threeScene.add(threeGlobe);
+
+            // Atmosphere Glow Mesh
+            const atmoGeo = new THREE.SphereGeometry(73, 64, 64);
+            const atmoMat = new THREE.MeshBasicMaterial({
+                color: 0x06b6d4,
+                transparent: true,
+                opacity: 0.18,
+                side: THREE.BackSide
+            });
+            const atmoMesh = new THREE.Mesh(atmoGeo, atmoMat);
+            threeScene.add(atmoMesh);
+
+            // Starfield Background Particles
+            const starGeo = new THREE.BufferGeometry();
+            const starCount = 800;
+            const starPositions = new Float32Array(starCount * 3);
+            for (let i = 0; i < starCount * 3; i += 3) {
+                starPositions[i] = (Math.random() - 0.5) * 800;
+                starPositions[i + 1] = (Math.random() - 0.5) * 800;
+                starPositions[i + 2] = (Math.random() - 0.5) * 800;
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+            const starMat = new THREE.PointsMaterial({ color: 0x38bdf8, size: 1.5, transparent: true, opacity: 0.6 });
+            threeStars = new THREE.Points(starGeo, starMat);
+            threeScene.add(threeStars);
+
+            // Render loop
+            function animateGlobe() {
+                globeAnimFrameId = requestAnimationFrame(animateGlobe);
+
+                if (!isGlobeZooming && threeGlobe) {
+                    threeGlobe.rotation.y += 0.0015;
+                }
+
+                if (threeStars) {
+                    threeStars.rotation.y += 0.0002;
+                }
+
+                threeRenderer.render(threeScene, threeCamera);
+            }
+            animateGlobe();
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                if (!container || !threeCamera || !threeRenderer) return;
+                const newW = container.clientWidth || window.innerWidth;
+                const newH = container.clientHeight || window.innerHeight;
+                threeCamera.aspect = newW / newH;
+                threeCamera.updateProjectionMatrix();
+                threeRenderer.setSize(newW, newH);
+            });
+        }
+
+        // Zoom Sequence into Indian Subcontinent and Enter Dashboard
+        function zoomToIndiaAndEnter() {
+            if (isGlobeZooming) return;
+            isGlobeZooming = true;
+
+            const satLayer = document.getElementById('satelliteIndiaZoomLayer');
+            const loadingScreen = document.getElementById('globeLoadingScreen');
+
+            // Rotate smoothly towards Indian Subcontinent and Dolly In
+            const startTime = performance.now();
+            const startZ = threeCamera.position.z;
+            const targetZ = 85;
+            const startRotY = threeGlobe.rotation.y;
+            const targetRotY = -Math.PI * 0.72; // Orient squarely on Bay of Bengal
+
+            if (satLayer) {
+                satLayer.style.opacity = '1';
+            }
+
+            function zoomStep(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / 1200, 1);
+                const ease = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // Ease in-out
+
+                const p = ease(progress);
+                threeCamera.position.z = startZ + (targetZ - startZ) * p;
+                threeGlobe.rotation.y = startRotY + (targetRotY - startRotY) * p;
+
+                if (progress < 1) {
+                    requestAnimationFrame(zoomStep);
+                } else {
+                    // Fade out loading screen smoothly
+                    if (loadingScreen) {
+                        loadingScreen.classList.add('fade-out');
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            // Ensure Leaflet map resizes cleanly
+                            if (leafletMap) {
+                                leafletMap.invalidateSize();
+                            }
+                        }, 900);
+                    }
+                }
+            }
+            requestAnimationFrame(zoomStep);
+        }
+
+        // Re-open 3D Globe Screen from Top Bar
+        function reopen3DGlobeView() {
+            const loadingScreen = document.getElementById('globeLoadingScreen');
+            const satLayer = document.getElementById('satelliteIndiaZoomLayer');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'flex';
+                loadingScreen.classList.remove('fade-out');
+                if (satLayer) satLayer.style.opacity = '0';
+                isGlobeZooming = false;
+                if (threeCamera) threeCamera.position.z = 240;
+            }
+        }
+
+        // =======================================================
+        // 2. TAB SWITCHERS (SYMMETRICAL LEFT & RIGHT PANELS)
+        // =======================================================
+        function switchLeftTab(tabId) {
+            const tabs = ['surge', 'grid', 'assets'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`leftTab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
+                const content = document.getElementById(`leftTab${t.charAt(0).toUpperCase() + t.slice(1)}Content`);
+                if (t === tabId) {
+                    if (btn) {
+                        btn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 bg-cyan-600/20 text-cyan-300 border border-cyan-500/40";
+                    }
+                    if (content) content.classList.remove('hidden');
+                } else {
+                    if (btn) {
+                        btn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-200";
+                    }
+                    if (content) content.classList.add('hidden');
+                }
+            });
+        }
+
+        function switchRightTab(tabId) {
+            const tabs = ['advisory', 'evac', 'aviation'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`rightTab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
+                const content = document.getElementById(`rightTab${t.charAt(0).toUpperCase() + t.slice(1)}Content`);
+                if (t === tabId) {
+                    if (btn) {
+                        btn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 bg-cyan-600/20 text-cyan-300 border border-cyan-500/40";
+                    }
+                    if (content) content.classList.remove('hidden');
+                } else {
+                    if (btn) {
+                        btn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-200";
+                    }
+                    if (content) content.classList.add('hidden');
+                }
+            });
+        }
+
+        // =======================================================
+        // 3. LEAFLET GIS MAP INITIALIZATION & LAYERS
+        // =======================================================
+        function initLeafletMap() {
+            leafletMap = L.map('map', {
+                center: [20.812, 86.974], // Dhamra / Odisha Coast
+                zoom: 8,
+                zoomControl: false,
+                attributionControl: false
+            });
+
+            L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
+            L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(leafletMap);
+
+            switchBaseMap('dark');
+
+            // Initialize Feature Layer Groups
+            mapLayers.surge = L.layerGroup().addTo(leafletMap);
+            mapLayers.weather = L.layerGroup().addTo(leafletMap);
+            mapLayers.overpass_grid = L.layerGroup().addTo(leafletMap);
+            mapLayers.roads = L.layerGroup().addTo(leafletMap);
+            mapLayers.shelters = L.layerGroup().addTo(leafletMap);
+            mapLayers.flights = L.layerGroup().addTo(leafletMap);
+
+            // Populate GIS Data
+            renderSurgePolygons(2.4);
+            initCoastalWeatherStations();
+            renderOverpassPowerGrid();
+            renderEvacuationCorridors();
+            renderCycloneShelters();
+            renderLiveAviationRadar();
+
+            // Map Click Listener to Fetch Open-Meteo Weather at any point
+            leafletMap.on('click', e => {
+                refreshCurrentWeather(e.latlng.lat, e.latlng.lng, `Custom Point (${e.latlng.lat.toFixed(2)}°N, ${e.latlng.lng.toFixed(2)}°E)`);
+            });
+        }
+
+        // Base Map Switcher
+        function switchBaseMap(styleKey) {
+            if (currentBaseTileLayer && leafletMap.hasLayer(currentBaseTileLayer)) {
+                leafletMap.removeLayer(currentBaseTileLayer);
+            }
+
+            const mapApiKey = localStorage.getItem('AEGIS_MAP_API_KEY') || '';
+            let tileUrl = '';
+
+            switch (styleKey) {
+                case 'nasa_gibs':
+                    tileUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+                    break;
+                case 'google_sat':
+                    tileUrl = `https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}`;
+                    break;
+                case 'google_terrain':
+                    tileUrl = `https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}`;
+                    break;
+                case 'satellite':
+                    tileUrl = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`;
+                    break;
+                case 'osm':
+                    tileUrl = `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`;
+                    break;
+                case 'dark':
+                default:
+                    tileUrl = `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`;
+                    break;
+            }
+
+            currentBaseTileLayer = L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(leafletMap);
+        }
+
+        function toggleMapLayer(layerName) {
+            const group = mapLayers[layerName];
+            const btn = document.getElementById(`layer${layerName.charAt(0).toUpperCase() + layerName.slice(1)}Btn`) ||
+                        document.getElementById(`layer${layerName.toUpperCase()}Btn`);
+            if (!group) return;
+
+            if (leafletMap.hasLayer(group)) {
+                leafletMap.removeLayer(group);
+                if (btn) btn.classList.add('opacity-50');
+            } else {
+                leafletMap.addLayer(group);
+                if (btn) btn.classList.remove('opacity-50');
+            }
+        }
+
+        function recenterMap() {
+            if (leafletMap) {
+                leafletMap.flyTo([20.812, 86.974], 8, { duration: 1.2 });
+            }
+        }
+
+        // =======================================================
+        // 4. GIS FEATURES & OVERPASS TURBO POWER GRID
+        // =======================================================
+        function renderSurgePolygons(peakSurge = 2.4) {
+            if (!mapLayers.surge) return;
+            mapLayers.surge.clearLayers();
+
+            const coastalSwaths = [
+                { center: [20.812, 86.974], radius: 24000, depth: peakSurge, color: '#ef4444', label: 'Dhamra Estuary Core Surge' },
+                { center: [20.720, 86.850], radius: 18000, depth: peakSurge * 0.85, color: '#f97316', label: 'Chandbali Flood Inundation' },
+                { center: [20.264, 86.671], radius: 20000, depth: peakSurge * 0.72, color: '#f59e0b', label: 'Paradeep Marine Shoaling Zone' },
+                { center: [21.630, 87.520], radius: 16000, depth: peakSurge * 0.65, color: '#eab308', label: 'Digha Coastal Surge Zone' }
+            ];
+
+            coastalSwaths.forEach(s => {
+                const circle = L.circle(s.center, {
+                    radius: s.radius,
+                    color: s.color,
+                    fillColor: s.color,
+                    fillOpacity: 0.35,
+                    weight: 2
+                }).addTo(mapLayers.surge);
+
+                circle.bindPopup(`
+                    <div class="text-xs font-sans text-gray-900 p-1 font-mono">
+                        <strong class="text-red-700 block mb-1">${s.label}</strong>
+                        Peak Hydrodynamic Surge: <strong>+${s.depth.toFixed(2)} m</strong><br>
+                        Hydrodynamic Risk: <span class="text-red-600 font-bold">CRITICAL</span>
+                    </div>
+                `);
+            });
+        }
+
+        function renderOverpassPowerGrid() {
+            if (!mapLayers.overpass_grid) return;
+            mapLayers.overpass_grid.clearLayers();
+
+            // Indian Extra-High-Voltage (EHV) Power Grid Dataset
+            const substations = [
+                { name: "Dhamra Port 220kV Substation", lat: 20.815, lon: 86.965, voltage: "220kV", risk: "CRITICAL", capacity: "320 MVA" },
+                { name: "Paradeep 400kV Bulk Substation", lat: 20.270, lon: 86.660, voltage: "400kV", risk: "HIGH", capacity: "630 MVA" },
+                { name: "Bhadrak 220kV Grid Substation", lat: 21.055, lon: 86.510, voltage: "220kV", risk: "MODERATE", capacity: "400 MVA" },
+                { name: "Balasore 400kV EHV Hub", lat: 21.490, lon: 86.920, voltage: "400kV", risk: "HIGH", capacity: "1000 MVA" },
+                { name: "Angul 765kV Super-Grid Station", lat: 20.840, lon: 85.150, voltage: "765kV", risk: "LOW", capacity: "3000 MVA" }
+            ];
+
+            substations.forEach(sub => {
+                const color = sub.voltage.includes('765') ? '#c084fc' : sub.voltage.includes('400') ? '#f43f5e' : '#f59e0b';
+                const marker = L.circleMarker([sub.lat, sub.lon], {
+                    radius: 7,
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.9,
+                    weight: 2
+                }).addTo(mapLayers.overpass_grid);
+
+                marker.bindPopup(`
+                    <div class="text-xs font-mono text-gray-900 p-1">
+                        <strong class="text-amber-700 block">${sub.name}</strong>
+                        Voltage Class: <strong>${sub.voltage}</strong><br>
+                        Capacity: ${sub.capacity}<br>
+                        Surge Vulnerability: <span class="font-bold text-red-600">${sub.risk}</span>
+                    </div>
+                `);
+            });
+
+            // Transmission Corridors
+            const powerLines = [
+                { from: [20.840, 85.150], to: [20.270, 86.660], voltage: "400kV", color: "#f43f5e" },
+                { from: [20.270, 86.660], to: [20.815, 86.965], voltage: "220kV", color: "#f59e0b" },
+                { from: [20.815, 86.965], to: [21.055, 86.510], voltage: "220kV", color: "#f59e0b" },
+                { from: [21.055, 86.510], to: [21.490, 86.920], voltage: "400kV", color: "#f43f5e" }
+            ];
+
+            powerLines.forEach(pl => {
+                L.polyline([pl.from, pl.to], {
+                    color: pl.color,
+                    weight: pl.voltage === '400kV' ? 3.5 : 2.5,
+                    opacity: 0.85
+                }).addTo(mapLayers.overpass_grid);
+            });
+        }
+
+        function renderEvacuationCorridors() {
+            if (!mapLayers.roads) return;
+            mapLayers.roads.clearLayers();
+
+            const nh16 = [
+                [20.264, 85.828],
+                [20.932, 86.132],
+                [21.055, 86.510],
+                [21.493, 86.932],
+                [21.930, 87.270]
+            ];
+
+            L.polyline(nh16, {
+                color: '#3b82f6',
+                weight: 4,
+                opacity: 0.9,
+                dashArray: '8, 6'
+            }).addTo(mapLayers.roads).bindPopup('<div class="text-xs font-mono text-gray-900"><strong>NH-16 Primary Evacuation Expressway</strong><br>Status: CLEAR / PASSABLE</div>');
+        }
+
+        function renderCycloneShelters() {
+            if (!mapLayers.shelters) return;
+            mapLayers.shelters.clearLayers();
+
+            const shelters = [
+                { name: "Dhamra Cyclone Shelter #1", lat: 20.820, lon: 86.950, cap: "1,500 Persons" },
+                { name: "Chandbali Multi-Purpose Shelter", lat: 20.780, lon: 86.740, cap: "2,200 Persons" },
+                { name: "Bhadrak District Medical Hub", lat: 21.060, lon: 86.500, cap: "800 Beds" }
+            ];
+
+            shelters.forEach(sh => {
+                L.circleMarker([sh.lat, sh.lon], {
+                    radius: 6,
+                    color: '#10b981',
+                    fillColor: '#10b981',
+                    fillOpacity: 0.9
+                }).addTo(mapLayers.shelters).bindPopup(`
+                    <div class="text-xs font-mono text-gray-900">
+                        <strong class="text-emerald-700">${sh.name}</strong><br>
+                        Capacity: ${sh.cap}
+                    </div>
+                `);
+            });
+        }
+
+        function renderLiveAviationRadar() {
+            if (!mapLayers.flights) return;
+            mapLayers.flights.clearLayers();
+
+            // Simulated Flights
+            const flights = [
+                { callsign: "AIC-482", from: "Bhubaneswar", to: "Delhi", lat: 20.95, lon: 85.80, alt: "32,000 ft" },
+                { callsign: "IGO-619", from: "Kolkata", to: "Chennai", lat: 21.20, lon: 86.50, alt: "28,000 ft" }
+            ];
+
+            flights.forEach(f => {
+                const planeIcon = L.divIcon({
+                    className: 'custom-plane-icon',
+                    html: `<div class="text-sky-400 font-mono text-[10px] bg-gray-950/80 px-1.5 py-0.5 rounded border border-sky-400 flex items-center gap-1 shadow"><i data-lucide="plane" class="w-3 h-3"></i> ${f.callsign}</div>`,
+                    iconSize: [70, 20]
+                });
+                L.marker([f.lat, f.lon], { icon: planeIcon }).addTo(mapLayers.flights).bindPopup(`
+                    <div class="text-xs font-mono text-gray-900">
+                        <strong>${f.callsign}</strong> (${f.from} &rarr; ${f.to})<br>
+                        Altitude: ${f.alt}
+                    </div>
+                `);
+            });
+            lucide.createIcons();
+        }
+
+        // =======================================================
+        // 5. OPEN-METEO LIVE METEOROLOGY & WEATHER STATIONS
+        // =======================================================
+        async function refreshCurrentWeather(lat = currentActiveWeather.lat, lon = currentActiveWeather.lon, name = currentActiveWeather.name) {
+            currentActiveWeather.lat = lat;
+            currentActiveWeather.lon = lon;
+            currentActiveWeather.name = name;
+
+            const nameEl = document.getElementById('weatherStationName');
+            const coordsEl = document.getElementById('weatherCoordsLabel');
+            if (nameEl) nameEl.innerText = name;
+            if (coordsEl) coordsEl.innerText = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
+
+            try {
+                let data = null;
+                const bUrl = getBackendUrl();
+                // Attempt backend query first if available
+                if (bUrl) {
+                    try {
+                        const res = await fetch(`${bUrl}/api/weather/live?lat=${lat}&lon=${lon}`);
+                        if (res.ok) data = await res.json();
+                    } catch (e) {
+                        console.log("Backend server offline, falling back to Open-Meteo direct API:", e);
+                    }
+                }
+
+                // Fallback to direct public Open-Meteo REST API
+                if (!data) {
+                    const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,surface_pressure,wind_speed_10m,wind_gusts_10m&timezone=auto`;
+                    const res = await fetch(omUrl);
+                    if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
+                    const raw = await res.json();
+                    const cur = raw.current || {};
+                    const wcode = cur.weather_code !== undefined ? cur.weather_code : 0;
+                    data = {
+                        source: "Open-Meteo Direct Public API",
+                        temperature_c: cur.temperature_2m,
+                        apparent_temperature_c: cur.apparent_temperature,
+                        relative_humidity_pct: cur.relative_humidity_2m,
+                        precipitation_mm: cur.precipitation !== undefined ? cur.precipitation : (cur.rain || 0),
+                        weather_code: wcode,
+                        weather_condition: WMO_WEATHER_NOTATIONS[wcode] || "Observed condition",
+                        surface_pressure_hpa: cur.surface_pressure,
+                        wind_speed_kmh: cur.wind_speed_10m,
+                        wind_gusts_kmh: cur.wind_gusts_10m
+                    };
+                }
+
+                currentActiveWeather.data = data;
+
+                // Update HUD displays
+                const tempEl = document.getElementById('liveTempDisplay');
+                const appTempEl = document.getElementById('liveApparentTemp');
+                const rainEl = document.getElementById('liveRainDisplay');
+                const humEl = document.getElementById('liveHumidityDisplay');
+                const windEl = document.getElementById('liveWindDisplay');
+                const gustEl = document.getElementById('liveGustsDisplay');
+                const presEl = document.getElementById('livePressureDisplay');
+                const wmoCodeTextEl = document.getElementById('wmoCodeText');
+                const wmoCodeBadgeEl = document.getElementById('wmoCodeBadge');
+
+                if (tempEl) tempEl.innerText = `${data.temperature_c !== undefined ? data.temperature_c : '--'}°C`;
+                if (appTempEl) appTempEl.innerText = `Feels: ${data.apparent_temperature_c !== undefined ? data.apparent_temperature_c : '--'}°C`;
+                if (rainEl) rainEl.innerHTML = `${data.precipitation_mm !== undefined ? data.precipitation_mm : 0} <span class="text-[9px] font-normal text-gray-400">mm</span>`;
+                if (humEl) humEl.innerText = `RH: ${data.relative_humidity_pct !== undefined ? data.relative_humidity_pct : '--'}%`;
+                if (windEl) windEl.innerHTML = `${data.wind_speed_kmh !== undefined ? data.wind_speed_kmh : '--'} <span class="text-[9px] font-normal text-gray-400">km/h</span>`;
+                if (gustEl) gustEl.innerText = `Gust: ${data.wind_gusts_kmh !== undefined ? data.wind_gusts_kmh : '--'} km/h`;
+                if (presEl) presEl.innerHTML = `${data.surface_pressure_hpa !== undefined ? data.surface_pressure_hpa : '--'} <span class="text-[9px] font-normal text-gray-400">hPa</span>`;
+
+                const wcode = String(data.weather_code);
+                const conditionName = data.weather_condition || WMO_WEATHER_NOTATIONS[wcode] || "Observed Weather";
+                const meta = WMO_META[wcode] || { severity: "Normal" };
+
+                if (wmoCodeTextEl) wmoCodeTextEl.innerText = `WMO ${wcode}: ${conditionName}`;
+                if (wmoCodeBadgeEl) {
+                    wmoCodeBadgeEl.className = `text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 border ${
+                        meta.severity === 'Critical' || meta.severity === 'Extreme' ? 'bg-red-950 text-red-300 border-red-500/50 animate-pulse' :
+                        meta.severity === 'Severe' ? 'bg-rose-950 text-rose-300 border-rose-500/50' :
+                        meta.severity === 'Warning' ? 'bg-amber-950 text-amber-300 border-amber-500/50' :
+                        meta.severity === 'Moderate' ? 'bg-blue-950 text-blue-300 border-blue-500/50' :
+                        'bg-emerald-950 text-emerald-300 border-emerald-500/50'
+                    }`;
+                }
+
+            } catch (err) {
+                console.error("Failed to fetch live weather:", err);
+            }
+        }
+
+        function initCoastalWeatherStations() {
+            if (!mapLayers.weather) return;
+            mapLayers.weather.clearLayers();
+
+            const stations = [
+                { name: "Dhamra Port Coastal Hub", lat: 20.812, lon: 86.974 },
+                { name: "Paradeep Deep-Sea Radar", lat: 20.264, lon: 86.671 },
+                { name: "Chandbali Estuary Station", lat: 20.778, lon: 86.745 },
+                { name: "Balasore Coastal Radar Post", lat: 21.493, lon: 86.932 },
+                { name: "Digha Marine Warning Centre", lat: 21.630, lon: 87.520 }
+            ];
+
+            stations.forEach(st => {
+                const marker = L.circleMarker([st.lat, st.lon], {
+                    radius: 6,
+                    color: '#10b981',
+                    fillColor: '#059669',
+                    fillOpacity: 0.9,
+                    weight: 2
+                }).addTo(mapLayers.weather);
+
+                marker.bindPopup(`
+                    <div class="text-xs font-mono text-gray-900 p-1">
+                        <strong class="text-emerald-800 block">${st.name}</strong>
+                        <button onclick="refreshCurrentWeather(${st.lat}, ${st.lon}, '${st.name}')" class="mt-2 w-full px-2 py-1 bg-emerald-600 text-white rounded text-xs font-bold">
+                            Fetch Observations
+                        </button>
+                    </div>
+                `);
+            });
+        }
+
+        // =======================================================
+        // 6. SLOSH TRANSECT CHART & DYNAMIC SIMULATOR
+        // =======================================================
+        function initTransectChart() {
+            const ctx = document.getElementById('transectChart')?.getContext('2d');
+            if (!ctx) return;
+
+            const labels = ['0km (Coast)', '3km', '6km', '9km', '12km', '15km'];
+            const elevationData = [0.8, 1.4, 2.2, 3.1, 4.5, 6.2];
+            const surgeLevelData = [2.4, 2.1, 1.8, 1.2, 0.4, 0.0];
+
+            transectChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Ground Elevation (m MSL)',
+                            data: elevationData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Peak Surge Profile (m)',
+                            data: surgeLevelData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.25)',
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { size: 10 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function updatePhysicsSimulation() {
+            const p = parseFloat(document.getElementById('inputPressure')?.value || 980);
+            const w = parseFloat(document.getElementById('inputWind')?.value || 125);
+            const t = parseFloat(document.getElementById('inputTide')?.value || 1.4);
+
+            document.getElementById('valPressureLabel').innerText = `${p} hPa`;
+            document.getElementById('valWindLabel').innerText = `${w} km/h`;
+            document.getElementById('valTideLabel').innerText = `+${t.toFixed(1)} m`;
+
+            // SLOSH Physics formula approximation
+            const deltaP = 1013.25 - p;
+            const invBarometer = deltaP * 0.0101;
+            const windStress = Math.pow(w / 3.6, 2) * 0.0032;
+            const peakSurge = Math.max(0.5, invBarometer + windStress + t);
+
+            document.getElementById('statSurge').innerHTML = `${peakSurge.toFixed(1)} <span class="text-[10px] font-normal text-gray-400">m</span>`;
+            document.getElementById('valInlandExtent').innerText = `~${(peakSurge * 2.8).toFixed(1)} km Inland`;
+
+            renderSurgePolygons(peakSurge);
+
+            if (transectChartInstance) {
+                transectChartInstance.data.datasets[1].data = [
+                    peakSurge,
+                    peakSurge * 0.85,
+                    peakSurge * 0.7,
+                    peakSurge * 0.45,
+                    peakSurge * 0.15,
+                    0.0
+                ];
+                transectChartInstance.update();
+            }
+        }
+
+        // =======================================================
+        // 7. MULTIMODAL AI ADVISORY & DIRECTIVE ENGINE
+        // =======================================================
+        function refreshAdvisoryContent() {
+            const body = document.getElementById('advisoryAudience')?.value || 'NDRF_SDMA';
+            const lang = document.getElementById('advisoryLanguage')?.value || 'en';
+
+            const directives = {
+                en: {
+                    NDRF_SDMA: "IMMEDIATE EVACUATION DIRECTIVE: Pre-position 12 NDRF flood rescue battalions along Bhadrak and Kendrapara districts. Heavy storm surge (+2.4m) forecast at Dhamra Port T-12h. Reinforce coastal power corridors.",
+                    MUNICIPAL_COLLECTORS: "MUNICIPAL EVACUATION ORDER: Move 120,000 residents from low-lying coastal habitations within 5km of Dhamra estuary to designated RCC shelters before 18:00 IST.",
+                    PORTS_MARITIME: "GREAT DANGER SIGNAL #10 HOISTED: Suspend all cargo handling and vessel movements at Dhamra and Paradeep Ports. All deep-sea trawlers must remain moored.",
+                    PUBLIC_FISHERFOLK: "PUBLIC ADVISORY: Total ban on venturing into North Bay of Bengal. Tidal inundation will submerge coastal lowlands. Stay inside concrete shelters."
+                },
+                hi: {
+                    NDRF_SDMA: "तत्काल निकासी निर्देश: भद्रक और केंद्रपाड़ा तटीय जिलों में 12 एनडीआरएफ बटालियनों की अग्रिम तैनाती करें। धमरा पोर्ट पर 2.4 मीटर तूफान वृद्धि की संभावना।",
+                    MUNICIPAL_COLLECTORS: "जिला कलेक्टर आदेश: धमरा मुहाने के 5 किमी के भीतर रहने वाले 1,20,000 नागरिकों को तुरंत पक्के चक्रवात आश्रयों में स्थानांतरित करें।",
+                    PORTS_MARITIME: "महाखतरा संकेत #10: धमरा और पारादीप बंदरगाहों पर सभी जहाजों की आवाजाही तुरंत रोकें।",
+                    PUBLIC_FISHERFOLK: "जन सुरक्षा चेतावनी: बंगाल की खाड़ी में जाने पर पूर्ण प्रतिबंध। तटीय क्षेत्रों के लोग सुरक्षित चक्रवात आश्रयों में रहें।"
+                },
+                or: {
+                    NDRF_SDMA: "ଜରୁରୀକାଳୀନ ନିର୍ଦ୍ଦେଶ: ଭଦ୍ରକ ଏବଂ କେନ୍ଦ୍ରାପଡ଼ା ଜିଲ୍ଲାରେ ୧୨ଟି NDRF ଟିମ୍ ମୁତୟନ କରନ୍ତୁ। ଧାମରା ବନ୍ଦରରେ ୨.୪ ମିଟର ଜୁଆର ଆଶଙ୍କା।",
+                    MUNICIPAL_COLLECTORS: "ଜିଲ୍ଲାପାଳଙ୍କ ନିର୍ଦ୍ଦେଶ: ଧାମରା ଉପକୂଳରୁ ୧,୨୦,୦୦୦ ଲୋକଙ୍କୁ ସୁରକ୍ଷିତ ବାତ୍ୟା ଆଶ୍ରୟସ୍ଥଳକୁ ସ୍ଥାନାନ୍ତର କରନ୍ତୁ।",
+                    PORTS_MARITIME: "ମହାବିପଦ ସଙ୍କେତ ୧୦: ଧାମରା ଏବଂ ପାରାଦୀପ ବନ୍ଦରରେ ସମସ୍ତ କାର୍ଯ୍ୟ ବନ୍ଦ ରଖନ୍ତୁ।",
+                    PUBLIC_FISHERFOLK: "ସାଧାରଣ ସତର୍କତା: ସମୁଦ୍ର ମଧ୍ୟକୁ ମାଛ ଧରିବାକୁ ଯାଆନ୍ତୁ ନାହିଁ।"
+                }
+            };
+
+            const langDict = directives[lang] || directives.en;
+            const text = langDict[body] || directives.en.NDRF_SDMA;
+
+            const textEl = document.getElementById('advisoryBodyText');
+            if (textEl) textEl.innerText = text;
+        }
+
+        function speakCurrentAdvisory() {
+            const text = document.getElementById('advisoryBodyText')?.innerText || "";
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Speech synthesis is not supported on this browser.");
+            }
+        }
+
+        function broadcastAlertSMS() {
+            alert("CAP Broadcast Alert SMS queued to 45,000 registered subscribers via OSDMA Early Warning Dissemination System (EWDS).");
+        }
+
+        function exportEmergencyBulletinPDF() {
+            const el = document.getElementById('directivePrintArea');
+            if (el && window.html2pdf) {
+                html2pdf().from(el).save('AegisCyclone_Directive_Bulletin.pdf');
+            } else {
+                window.print();
+            }
+        }
+
+        // =======================================================
+        // 8. TIMELINE SCRUBBER
+        // =======================================================
+        function toggleTimelinePlay() {
+            const playIcon = document.getElementById('playIcon');
+            const slider = document.getElementById('timelineSlider');
+            if (!slider) return;
+
+            isTimelinePlaying = !isTimelinePlaying;
+            if (isTimelinePlaying) {
+                if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
+                timelineInterval = setInterval(() => {
+                    let val = parseInt(slider.value);
+                    val = (val + 1) % 7;
+                    slider.value = val;
+                    updateTimelineDisplay(val);
+                }, 1800);
+            } else {
+                if (playIcon) playIcon.setAttribute('data-lucide', 'play');
+                clearInterval(timelineInterval);
+            }
+            lucide.createIcons();
+        }
+
+        function resetTimeline() {
+            const slider = document.getElementById('timelineSlider');
+            if (slider) {
+                slider.value = 4; // T-0 Landfall
+                updateTimelineDisplay(4);
+            }
+        }
+
+        function updateTimelineDisplay(val) {
+            const labels = ['T-72h Warning', 'T-48h Alert', 'T-24h Action', 'T-12h Pre-Landfall', 'T-0 Landfall', 'T+12h Relief', 'T+24h Recovery'];
+            const labelEl = document.getElementById('currentTimelineLabel');
+            if (labelEl) labelEl.innerText = labels[val] || 'T-12h Pre-Landfall';
+        }
+
+        // =======================================================
+        // 9. MODALS & INITIALIZATION
+        // =======================================================
+        function getBackendUrl() {
+            const saved = localStorage.getItem('AEGIS_BACKEND_URL');
+            if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://127.0.0.1:8000';
+            }
+            return '';
+        }
+
+        function openApiModal() {
+            const backendInput = document.getElementById('modalBackendUrlInput');
+            if (backendInput) backendInput.value = localStorage.getItem('AEGIS_BACKEND_URL') || (window.location.hostname === 'localhost' ? 'http://127.0.0.1:8000' : '');
+            document.getElementById('apiModal')?.classList.remove('hidden');
+        }
+        function closeApiModal() { document.getElementById('apiModal')?.classList.add('hidden'); }
+        function openOverpassModal() { document.getElementById('overpassModal')?.classList.remove('hidden'); }
+        function closeOverpassModal() { document.getElementById('overpassModal')?.classList.add('hidden'); }
+        function openWmoModal() {
+            populateWmoTable();
+            document.getElementById('wmoModal')?.classList.remove('hidden');
+        }
+        function closeWmoModal() { document.getElementById('wmoModal')?.classList.add('hidden'); }
+        function openParametricModal() { document.getElementById('parametricModal')?.classList.remove('hidden'); }
+        function closeParametricModal() { document.getElementById('parametricModal')?.classList.add('hidden'); }
+
+        function saveApiKeysModal() {
+            const backendUrl = document.getElementById('modalBackendUrlInput')?.value;
+            const googleKey = document.getElementById('modalGoogleKeyInput')?.value;
+            const nasaKey = document.getElementById('modalNasaKeyInput')?.value;
+            const aviationKey = document.getElementById('modalAviationKeyInput')?.value;
+            const mapKey = document.getElementById('modalMapKeyInput')?.value;
+
+            if (backendUrl !== undefined) localStorage.setItem('AEGIS_BACKEND_URL', backendUrl);
+            if (googleKey) localStorage.setItem('AEGIS_GOOGLE_KEY', googleKey);
+            if (nasaKey) localStorage.setItem('AEGIS_NASA_KEY', nasaKey);
+            if (aviationKey) localStorage.setItem('AEGIS_AVIATION_KEY', aviationKey);
+            if (mapKey) localStorage.setItem('AEGIS_MAP_API_KEY', mapKey);
+
+            closeApiModal();
+            alert("All Geospatial, Backend Endpoint & Meteorological API Keys Synchronized Successfully.");
+        }
+
+        function populateWmoTable() {
+            const container = document.getElementById('wmoCodeListContainer');
+            if (!container || container.children.length > 0) return;
+
+            Object.entries(WMO_WEATHER_NOTATIONS).forEach(([code, desc]) => {
+                const meta = WMO_META[code] || { severity: "Normal" };
+                const card = document.createElement('div');
+                card.className = "p-2 rounded-lg bg-gray-900 border border-gray-800 flex items-center justify-between";
+                card.innerHTML = `
+                    <div>
+                        <span class="font-bold text-emerald-400">Code ${code}:</span>
+                        <span class="text-gray-300 block text-[11px]">${desc}</span>
+                    </div>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-${meta.color || 'emerald'}-950 text-${meta.color || 'emerald'}-300 border border-${meta.color || 'emerald'}-500/40">${meta.severity}</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderCriticalAssets() {
+            const container = document.getElementById('infraCardsContainer');
+            if (!container) return;
+
+            const assets = [
+                { name: "Dhamra Port LNG Terminal", type: "Maritime Hub", elev: "3.2m", risk: "CRITICAL" },
+                { name: "Kendrapara District Hospital", type: "Trauma Care", elev: "6.8m", risk: "SAFE" },
+                { name: "Chandbali 220kV Substation", type: "Power Grid", elev: "2.1m", risk: "HIGH" },
+                { name: "Bhadrak-Balasore Rail Line", type: "Rail Corridor", elev: "4.5m", risk: "MODERATE" }
+            ];
+
+            assets.forEach(a => {
+                const div = document.createElement('div');
+                div.className = "p-2.5 rounded-lg bg-gray-900/90 border border-gray-800 flex items-center justify-between";
+                div.innerHTML = `
+                    <div>
+                        <strong class="text-white block">${a.name}</strong>
+                        <span class="text-[10px] text-gray-400">${a.type} &bull; Elev: ${a.elev}</span>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${
+                        a.risk === 'CRITICAL' ? 'bg-red-950 text-red-300 border border-red-500/40' :
+                        a.risk === 'HIGH' ? 'bg-amber-950 text-amber-300 border border-amber-500/40' :
+                        'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                    }">${a.risk}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // On Page Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initThreeGlobe();
+            initLeafletMap();
+            initTransectChart();
+            renderCriticalAssets();
+            refreshAdvisoryContent();
+            refreshCurrentWeather();
+        });
+    </script>
+</body>
+</html>
