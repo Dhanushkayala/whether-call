@@ -1,14 +1,26 @@
 import os
 import sys
+import importlib.util
 
-# Ensure backend directory is in sys.path
-backend_dir = os.path.join(os.path.dirname(__file__), "output", "backend")
+# Ensure root and backend directory are in sys.path
+root_dir = os.path.abspath(os.path.dirname(__file__))
+backend_dir = os.path.join(root_dir, "output", "backend")
+
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
-from main import app
+# Load backend main.py explicitly to avoid circular 'main' import conflict
+backend_main_file = os.path.join(backend_dir, "main.py")
+spec = importlib.util.spec_from_file_location("aegis_backend_main", backend_main_file)
+aegis_backend_main = importlib.util.module_from_spec(spec)
+sys.modules["aegis_backend_main"] = aegis_backend_main
+spec.loader.exec_module(aegis_backend_main)
+
+app = aegis_backend_main.app
 
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)
