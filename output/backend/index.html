@@ -792,9 +792,252 @@
         .anim-wave { animation: iconWaveFloat 2s ease-in-out infinite; display: inline-block; }
         .anim-bounce { animation: iconBounceSoft 2.4s ease-in-out infinite; display: inline-block; }
         .anim-electric { animation: iconElectricSpark 1.6s ease-in-out infinite; display: inline-block; }
+
+        /* Cinematic Space-to-India Satellite Zoom Overlay & HUD */
+        .space-cinematic-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 99999;
+            background: #020611;
+            overflow: hidden;
+            pointer-events: auto;
+            transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .space-cinematic-overlay canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .space-cinematic-hud {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px 32px;
+            font-family: var(--font-mono, monospace);
+            color: #79dce8;
+            z-index: 10;
+        }
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: auto;
+        }
+        .hud-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #fff;
+            text-shadow: 0 0 12px rgba(121, 220, 232, 0.8);
+        }
+        .hud-pulse {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #79dce8;
+            box-shadow: 0 0 12px #79dce8;
+            animation: iconPulseGlow 1.5s infinite;
+        }
+        .hud-target-badge {
+            background: rgba(4, 20, 39, 0.85);
+            border: 1px solid rgba(121, 220, 232, 0.4);
+            border-radius: 20px;
+            padding: 6px 18px;
+            font-size: 12px;
+            color: #79dce8;
+            box-shadow: 0 0 18px rgba(0,0,0,0.6);
+            letter-spacing: 0.8px;
+            backdrop-filter: blur(8px);
+        }
+        .hud-skip-btn {
+            background: rgba(121, 220, 232, 0.15);
+            border: 1px solid rgba(121, 220, 232, 0.5);
+            color: #fff;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(6px);
+        }
+        .hud-skip-btn:hover {
+            background: #79dce8;
+            color: #030d1a;
+            box-shadow: 0 0 16px #79dce8;
+        }
+        .hud-center-reticle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+        }
+        .reticle-ring {
+            position: absolute;
+            inset: 0;
+            border: 1.5px dashed rgba(121, 220, 232, 0.65);
+            border-radius: 50%;
+            animation: radarSweep 6s linear infinite;
+        }
+        .reticle-crosshair {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border-top: 2px solid #ef4444;
+            border-bottom: 2px solid #ef4444;
+            border-left: 2px solid #ef4444;
+            border-right: 2px solid #ef4444;
+        }
+        .reticle-crosshair::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -18px;
+            right: -18px;
+            height: 1px;
+            background: rgba(239, 68, 68, 0.7);
+            transform: translateY(-50%);
+        }
+        .reticle-crosshair::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: -18px;
+            bottom: -18px;
+            width: 1px;
+            background: rgba(239, 68, 68, 0.7);
+            transform: translateX(-50%);
+        }
+        .reticle-coords {
+            position: absolute;
+            bottom: -32px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            background: rgba(3, 13, 26, 0.9);
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(239, 68, 68, 0.6);
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+        .hud-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: linear-gradient(180deg, transparent, rgba(2, 6, 17, 0.85));
+            padding: 16px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(121, 220, 232, 0.15);
+        }
+        .hud-footer-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .hud-telemetry-col {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .hud-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .hud-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(121, 220, 232, 0.6);
+        }
+        .hud-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .hud-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0284c7, #79dce8, #10b981);
+            box-shadow: 0 0 10px #79dce8;
+            transition: width 0.05s linear;
+        }
     </style>
 </head>
 <body>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- CINEMATIC SATELLITE SPACE-TO-INDIA GEOGRAPHIC ZOOM OVERLAY     -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="spaceCinematicOverlay" class="space-cinematic-overlay" style="display:none; opacity:0;">
+        <canvas id="spaceCinematicCanvas"></canvas>
+        <div class="space-cinematic-hud">
+            <div class="hud-header">
+                <div class="hud-brand">
+                    <span class="hud-pulse"></span>
+                    <span>SATELLITE RECONNAISSANCE SENSOR // ORBITAL DESCENT</span>
+                </div>
+                <div class="hud-target-badge" id="hudTargetLocation">TARGET: DHAMRA COAST, ODISHA [20.812° N, 86.974° E]</div>
+                <button class="hud-skip-btn" onclick="skipCinematicTransition()">SKIP [ESC]</button>
+            </div>
+
+            <div class="hud-center-reticle" id="hudReticle">
+                <div class="reticle-ring"></div>
+                <div class="reticle-crosshair"></div>
+                <div class="reticle-coords" id="hudCenterCoords">20.81° N, 86.97° E</div>
+            </div>
+
+            <div class="hud-footer">
+                <div class="hud-footer-stats">
+                    <div class="hud-telemetry-col">
+                        <span class="hud-label">SATELLITE ALTITUDE</span>
+                        <span class="hud-value" id="hudAltitude">18,000 KM</span>
+                    </div>
+                    <div class="hud-telemetry-col">
+                        <span class="hud-label">TRAJECTORY STAGE</span>
+                        <span class="hud-value" id="hudStage">DEEP SPACE // EARTH APPROACH</span>
+                    </div>
+                    <div class="hud-telemetry-col">
+                        <span class="hud-label">DESCENT VELOCITY</span>
+                        <span class="hud-value" id="hudVelocity">28,400 KM/H</span>
+                    </div>
+                    <div class="hud-telemetry-col">
+                        <span class="hud-label">COORDINATE LOCK</span>
+                        <span class="hud-value" id="hudLockStatus" style="color:var(--cyan);">TRACKING</span>
+                    </div>
+                </div>
+                <div class="hud-progress-bar">
+                    <div class="hud-progress-fill" id="hudProgressFill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Unified Master Navbar -->
     <header class="navbar">
@@ -1394,7 +1637,7 @@
             if (pageId === 'map') {
                 document.getElementById('navMap').classList.add('is-active');
                 document.getElementById('viewMap').classList.add('is-active');
-                setTimeout(initMapIfNeeded, 100);
+                triggerCinematicZoom('map');
             }
             if (pageId === 'analytics') {
                 document.getElementById('navAnalytics').classList.add('is-active');
@@ -1429,16 +1672,29 @@
                 center: [20.81, 86.97],
                 zoom: 8,
                 zoomControl: true,
-                attributionControl: false
+                attributionControl: false,
+                zoomSnap: 0.25,
+                zoomDelta: 0.5,
+                wheelPxPerZoomLevel: 120,
+                wheelDebounceTime: 40,
+                zoomAnimation: true,
+                fadeAnimation: true,
+                markerZoomAnimation: true
             });
 
             // Base Layers using user-provided API Keys and NASA GIBS WMTS
             layerGroups.baseGeoapify = L.tileLayer(`https://maps.geoapify.com/v1/tile/dark-matter-purple-roads/{z}/{x}/{y}.png?apiKey=${MAP_API_KEY}`, {
                 maxZoom: 19,
+                updateWhenZooming: false,
+                updateWhenIdle: true,
+                keepBuffer: 6,
                 attribution: '© Geoapify © OpenStreetMap'
             });
             layerGroups.baseCarto = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 19,
+                updateWhenZooming: false,
+                updateWhenIdle: true,
+                keepBuffer: 6,
                 attribution: '© CARTO'
             });
             // NASA GIBS WMTS EPSG:3857 Corrected Reflectance True Color Tiles (upscaled cleanly with maxNativeZoom: 8)
@@ -1446,21 +1702,33 @@
                 maxNativeZoom: 8,
                 maxZoom: 19,
                 tileSize: 256,
+                updateWhenZooming: false,
+                updateWhenIdle: true,
+                keepBuffer: 6,
                 attribution: '© NASA Earthdata / GIBS / EOSDIS'
             });
             layerGroups.baseNasaModis = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg', {
                 maxNativeZoom: 8,
                 maxZoom: 19,
                 tileSize: 256,
+                updateWhenZooming: false,
+                updateWhenIdle: true,
+                keepBuffer: 6,
                 attribution: '© NASA Earthdata / GIBS / EOSDIS'
             });
             layerGroups.baseNasa = layerGroups.baseNasaViirs;
             layerGroups.baseSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 18,
+                updateWhenZooming: false,
+                updateWhenIdle: true,
+                keepBuffer: 6,
                 attribution: '© Esri, Earthstar Geographics'
             });
             layerGroups.baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
+                updateWhenZooming: false,
+                updateWhenIdle: true,
+                keepBuffer: 6,
                 attribution: '© OpenStreetMap contributors'
             });
 
@@ -2018,6 +2286,494 @@
         function setTimelineIndex(idx) {
             const labels = ['T-72h', 'T-48h', 'T-24h', 'T-12h', 'T-0 (Landfall)', 'T+12h', 'T+24h'];
             document.getElementById('timelineLabel').textContent = labels[idx] || 'T-0';
+        }
+
+        // ==========================================
+        // SATELLITE SPACE-TO-INDIA CINEMATIC ENGINE
+        // ==========================================
+        const CINEMATIC_CONFIG = {
+            duration: 5200, // Duration in ms
+            target: {
+                name: "DHAMRA COAST, ODISHA",
+                badge: "TARGET: DHAMRA COAST, ODISHA [20.812° N, 86.974° E]",
+                lat: 20.812,
+                lng: 86.974,
+                zoom: 8.5
+            },
+            startLat: 12.0,
+            startLng: 65.0,
+            startAltitude: 18000000, // 18,000 km
+            endAltitude: 500 // 500 m
+        };
+
+        let cinematicState = {
+            active: false,
+            startTime: 0,
+            rafId: null,
+            skipped: false
+        };
+
+        // Procedural Starfield
+        let cinematicStars = [];
+        function initCinematicStars(count = 350) {
+            cinematicStars = [];
+            for (let i = 0; i < count; i++) {
+                cinematicStars.push({
+                    x: (Math.random() - 0.5) * 2000,
+                    y: (Math.random() - 0.5) * 2000,
+                    z: Math.random() * 1000 + 100,
+                    size: Math.random() * 1.8 + 0.5,
+                    brightness: Math.random() * 0.7 + 0.3
+                });
+            }
+        }
+
+        // Vector Polygons for Earth Continents (Spherical Coordinates [lat, lng])
+        const CONTINENT_EURASIA = [
+            [70, 30], [72, 60], [70, 90], [72, 130], [65, 170], [60, 160], [55, 140],
+            [40, 120], [30, 120], [20, 110], [10, 105], [5, 100], [15, 95], [22, 90],
+            [10, 78], [25, 62], [25, 55], [12, 45], [30, 32], [38, 25], [36, -5],
+            [44, -1], [50, 2], [58, 8], [65, 15], [70, 30]
+        ];
+
+        const CONTINENT_AFRICA = [
+            [35, -5], [37, 10], [32, 32], [12, 43], [10, 50], [0, 42], [-12, 40],
+            [-26, 32], [-34, 18], [-33, 26], [-34, 18], [-20, 12], [-5, 8],
+            [4, 8], [5, -3], [15, -17], [22, -16], [32, -10], [35, -5]
+        ];
+
+        const CONTINENT_AUSTRALIA = [
+            [-12, 132], [-14, 136], [-12, 142], [-20, 148], [-32, 152], [-38, 146],
+            [-35, 136], [-32, 128], [-35, 116], [-28, 114], [-20, 118], [-14, 126], [-12, 132]
+        ];
+
+        // High-Precision Indian Subcontinent Coastline & Boundary Polygon
+        const SUB_CONTINENT_INDIA = [
+            [35.5, 74.5], [36.2, 76.8], [35.6, 78.8], [34.5, 79.2], [32.5, 79.0], [31.2, 79.8],
+            [30.4, 81.0], [29.0, 80.2], [28.2, 82.0], [27.0, 85.0], [26.5, 88.0],
+            [27.3, 88.6], [27.8, 89.0], [27.5, 92.0], [28.5, 94.5], [28.2, 96.5],
+            [27.0, 96.0], [25.5, 94.5], [23.5, 93.5], [22.0, 92.8],
+            [21.5, 89.5], // Sunderbans / Ganges Delta
+            [21.65, 87.5], // Digha / Medinipur
+            [21.5, 86.9], // Balasore
+            [20.812, 86.974], // Dhamra Port & River Mouth
+            [20.3, 86.6], // Paradip
+            [19.8, 85.8], // Puri
+            [19.7, 85.3], // Chilika Lake
+            [19.26, 84.9], // Gopalpur
+            [17.68, 83.21], // Visakhapatnam
+            [16.5, 81.8], // Godavari Delta
+            [15.9, 80.47], // Krishna Delta / Bapatla
+            [14.5, 80.0], // Nellore
+            [13.08, 80.27], // Chennai
+            [11.9, 79.8], // Puducherry
+            [10.8, 79.85], // Nagapattinam
+            [9.28, 79.3], // Rameshwaram
+            [8.08, 77.55], // Kanyakumari (Cape Comorin)
+            [8.5, 76.9], // Thiruvananthapuram
+            [9.9, 76.2], // Cochin
+            [11.2, 75.8], // Kozhikode
+            [12.9, 74.8], // Mangalore
+            [15.3, 73.8], // Goa
+            [18.9, 72.8], // Mumbai
+            [20.5, 72.8], // Daman
+            [21.0, 72.5], // Gulf of Khambhat
+            [20.7, 70.9], // Diu
+            [22.2, 69.0], // Dwarka / Saurashtra
+            [23.0, 69.0], // Gulf of Kutch
+            [23.8, 68.8], // Rann of Kutch
+            [24.5, 71.0], [27.0, 71.0], [29.5, 73.0], [31.5, 74.8], [34.5, 74.5]
+        ];
+
+        const SRI_LANKA_POLYGON = [
+            [9.8, 80.2], [9.0, 80.9], [8.0, 81.5], [6.9, 81.8], [5.9, 80.5], [6.8, 79.9], [8.5, 79.8], [9.8, 80.2]
+        ];
+
+        // 3D Spherical Orthographic Projection Math
+        function projectSpherical(lat, lng, centerLat, centerLng, radius, width, height) {
+            const rad = Math.PI / 180;
+            const phi = lat * rad;
+            const lambda = lng * rad;
+            const phi0 = centerLat * rad;
+            const lambda0 = centerLng * rad;
+
+            const cosPhi = Math.cos(phi);
+            const sinPhi = Math.sin(phi);
+            const cosPhi0 = Math.cos(phi0);
+            const sinPhi0 = Math.sin(phi0);
+            const dLambda = lambda - lambda0;
+
+            const cosC = sinPhi0 * sinPhi + cosPhi0 * cosPhi * Math.cos(dLambda);
+            const isVisible = cosC > -0.15; // Visible on hemisphere
+
+            const x = radius * cosPhi * Math.sin(dLambda);
+            const y = radius * (cosPhi0 * sinPhi - sinPhi0 * cosPhi * Math.cos(dLambda));
+
+            return {
+                x: width / 2 + x,
+                y: height / 2 - y,
+                visible: isVisible,
+                cosC: cosC
+            };
+        }
+
+        function triggerCinematicZoom(nextPage = 'map') {
+            const overlay = document.getElementById('spaceCinematicOverlay');
+            const canvas = document.getElementById('spaceCinematicCanvas');
+            if (!overlay || !canvas) {
+                initMapIfNeeded();
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            initCinematicStars(380);
+
+            cinematicState.active = true;
+            cinematicState.skipped = false;
+            cinematicState.startTime = performance.now();
+
+            overlay.style.display = 'block';
+            overlay.style.opacity = '1';
+
+            // Resize canvas
+            function resizeCanvas() {
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = window.innerWidth * dpr;
+                canvas.height = window.innerHeight * dpr;
+                canvas.style.width = window.innerWidth + 'px';
+                canvas.style.height = window.innerHeight + 'px';
+                ctx.scale(dpr, dpr);
+            }
+            resizeCanvas();
+
+            // Setup ESC key listener for skip
+            function handleKeyDown(e) {
+                if (e.key === 'Escape' || e.keyCode === 27) {
+                    skipCinematicTransition();
+                }
+            }
+            window.addEventListener('keydown', handleKeyDown, { once: true });
+
+            // Initialize map in the background so tiles pre-cache
+            setTimeout(() => {
+                initMapIfNeeded();
+                if (map) {
+                    map.setView([CINEMATIC_CONFIG.target.lat, CINEMATIC_CONFIG.target.lng], CINEMATIC_CONFIG.target.zoom, { animate: false });
+                }
+            }, 300);
+
+            // Animation Loop
+            function frame(now) {
+                if (!cinematicState.active) return;
+
+                const elapsed = now - cinematicState.startTime;
+                let rawProgress = Math.min(1.0, elapsed / CINEMATIC_CONFIG.duration);
+
+                // Smooth cubic bezier easing
+                const progress = rawProgress < 0.5
+                    ? 4 * rawProgress * rawProgress * rawProgress
+                    : 1 - Math.pow(-2 * rawProgress + 2, 3) / 2;
+
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+
+                // Clear Frame
+                ctx.fillStyle = '#020617';
+                ctx.fillRect(0, 0, width, height);
+
+                // Dynamic Trajectory Interpolation
+                const currentLat = CINEMATIC_CONFIG.startLat + (CINEMATIC_CONFIG.target.lat - CINEMATIC_CONFIG.startLat) * progress;
+                const currentLng = CINEMATIC_CONFIG.startLng + (CINEMATIC_CONFIG.target.lng - CINEMATIC_CONFIG.startLng) * progress;
+
+                // Exponential Altitude Curve: 18,000,000m -> 500m
+                const altitude = Math.round(CINEMATIC_CONFIG.startAltitude * Math.pow(CINEMATIC_CONFIG.endAltitude / CINEMATIC_CONFIG.startAltitude, progress));
+
+                // Velocity curve (peaks during mid-orbit descent, slows on approach)
+                let velocity = 28400;
+                if (progress < 0.4) {
+                    velocity = Math.round(18000 + progress * 26000);
+                } else if (progress < 0.8) {
+                    velocity = Math.round(28400 - (progress - 0.4) * 55000);
+                } else {
+                    velocity = Math.max(180, Math.round(6400 * (1 - progress)));
+                }
+
+                // Earth Radius in Screen Space
+                const baseRadius = Math.min(width, height) * 0.42;
+                const earthRadius = baseRadius * Math.pow(25, progress * 1.6);
+
+                // 1. Render Starfield with Speed Streak Effect
+                ctx.save();
+                const streakFactor = (velocity / 28400) * 12 * (1 - progress * 0.7);
+                cinematicStars.forEach(star => {
+                    const sx = width / 2 + star.x;
+                    const sy = height / 2 + star.y;
+                    const alpha = Math.max(0, (1 - progress * 1.2) * star.brightness);
+                    if (alpha > 0.02) {
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                        ctx.fillStyle = `rgba(224, 242, 254, ${alpha})`;
+                        ctx.lineWidth = star.size;
+
+                        if (streakFactor > 2) {
+                            ctx.beginPath();
+                            ctx.moveTo(sx, sy);
+                            const dx = (star.x / 100) * streakFactor;
+                            const dy = (star.y / 100) * streakFactor;
+                            ctx.lineTo(sx + dx, sy + dy);
+                            ctx.stroke();
+                        } else {
+                            ctx.beginPath();
+                            ctx.arc(sx, sy, star.size, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                });
+                ctx.restore();
+
+                // 2. Render 3D Earth Globe
+                const globeCenter = projectSpherical(currentLat, currentLng, currentLat, currentLng, earthRadius, width, height);
+                const gcx = globeCenter.x;
+                const gcy = globeCenter.y;
+
+                if (earthRadius > 10) {
+                    // Deep Oceanic Base Gradient
+                    const oceanGrad = ctx.createRadialGradient(
+                        gcx - earthRadius * 0.35, gcy - earthRadius * 0.35, earthRadius * 0.1,
+                        gcx, gcy, earthRadius
+                    );
+                    oceanGrad.addColorStop(0, '#0c4a6e'); // Luminous azure
+                    oceanGrad.addColorStop(0.5, '#073366'); // Ocean blue
+                    oceanGrad.addColorStop(0.85, '#021838'); // Deep navy
+                    oceanGrad.addColorStop(1, '#010b1a'); // Dark edge
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(gcx, gcy, earthRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = oceanGrad;
+                    ctx.fill();
+                    ctx.clip(); // Clip landmasses within sphere
+
+                    // Helper: Draw Spherical Vector Polygons
+                    function drawSphericalPoly(coords, fillColor, strokeColor, lineWidth = 1) {
+                        ctx.beginPath();
+                        let first = true;
+                        for (let i = 0; i < coords.length; i++) {
+                            const p = projectSpherical(coords[i][0], coords[i][1], currentLat, currentLng, earthRadius, width, height);
+                            if (p.visible) {
+                                if (first) {
+                                    ctx.moveTo(p.x, p.y);
+                                    first = false;
+                                } else {
+                                    ctx.lineTo(p.x, p.y);
+                                }
+                            }
+                        }
+                        ctx.closePath();
+                        if (fillColor) {
+                            ctx.fillStyle = fillColor;
+                            ctx.fill();
+                        }
+                        if (strokeColor) {
+                            ctx.strokeStyle = strokeColor;
+                            ctx.lineWidth = lineWidth;
+                            ctx.stroke();
+                        }
+                    }
+
+                    // Render Base Continents
+                    drawSphericalPoly(CONTINENT_AFRICA, 'rgba(15, 45, 30, 0.75)', 'rgba(56, 189, 248, 0.25)', 1);
+                    drawSphericalPoly(CONTINENT_EURASIA, 'rgba(12, 40, 28, 0.75)', 'rgba(56, 189, 248, 0.25)', 1);
+                    drawSphericalPoly(CONTINENT_AUSTRALIA, 'rgba(20, 48, 32, 0.75)', 'rgba(56, 189, 248, 0.25)', 1);
+
+                    // Render High-Precision Indian Subcontinent
+                    const indiaFill = progress > 0.5
+                        ? 'rgba(6, 78, 59, 0.85)'
+                        : 'rgba(16, 70, 45, 0.8)';
+                    const indiaBorder = progress > 0.6
+                        ? 'rgba(56, 189, 248, 0.95)'
+                        : 'rgba(56, 189, 248, 0.6)';
+                    drawSphericalPoly(SUB_CONTINENT_INDIA, indiaFill, indiaBorder, progress > 0.6 ? 2.5 : 1.5);
+                    drawSphericalPoly(SRI_LANKA_POLYGON, 'rgba(6, 78, 59, 0.85)', indiaBorder, 1.5);
+
+                    // Render Bay of Bengal Cyclone Spiral Cloud Vortex
+                    if (progress > 0.25) {
+                        const cycloneEye = projectSpherical(20.4, 87.5, currentLat, currentLng, earthRadius, width, height);
+                        if (cycloneEye.visible) {
+                            const spiralSize = Math.max(30, earthRadius * 0.18);
+                            ctx.save();
+                            ctx.translate(cycloneEye.x, cycloneEye.y);
+                            ctx.rotate((now * 0.001) + (progress * 5));
+
+                            // Spiral Arms
+                            for (let a = 0; a < 3; a++) {
+                                ctx.beginPath();
+                                ctx.strokeStyle = `rgba(255, 255, 255, ${Math.min(0.7, 0.2 + progress * 0.5)})`;
+                                ctx.lineWidth = 4 + progress * 8;
+                                ctx.lineCap = 'round';
+                                for (let theta = 0; theta < Math.PI * 2.5; theta += 0.2) {
+                                    const r = (theta / (Math.PI * 2.5)) * spiralSize;
+                                    const ang = theta + (a * (Math.PI * 2 / 3));
+                                    const px = r * Math.cos(ang);
+                                    const py = r * Math.sin(ang);
+                                    if (theta === 0) ctx.moveTo(px, py);
+                                    else ctx.lineTo(px, py);
+                                }
+                                ctx.stroke();
+                            }
+                            // Cyclone Eye Center
+                            ctx.beginPath();
+                            ctx.arc(0, 0, 8 + progress * 10, 0, Math.PI * 2);
+                            ctx.fillStyle = 'rgba(2, 6, 23, 0.8)';
+                            ctx.fill();
+                            ctx.strokeStyle = '#ef4444';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }
+
+                    // Tactical Radar / Scanning Rings (during regional & tactical descent)
+                    if (progress > 0.65) {
+                        const targetPt = projectSpherical(CINEMATIC_CONFIG.target.lat, CINEMATIC_CONFIG.target.lng, currentLat, currentLng, earthRadius, width, height);
+                        if (targetPt.visible) {
+                            const ringPulse = (now * 0.003) % 1;
+                            const ringRadius = (30 + ringPulse * 120) * (progress * 1.5);
+                            ctx.strokeStyle = `rgba(56, 189, 248, ${0.8 * (1 - ringPulse)})`;
+                            ctx.lineWidth = 1.5;
+                            ctx.beginPath();
+                            ctx.arc(targetPt.x, targetPt.y, ringRadius, 0, Math.PI * 2);
+                            ctx.stroke();
+
+                            // Tactical Grid Crosshairs
+                            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(targetPt.x - 60, targetPt.y);
+                            ctx.lineTo(targetPt.x + 60, targetPt.y);
+                            ctx.moveTo(targetPt.x, targetPt.y - 60);
+                            ctx.lineTo(targetPt.x, targetPt.y + 60);
+                            ctx.stroke();
+                        }
+                    }
+
+                    // Sunlight Terminator & Shading
+                    const shadowGrad = ctx.createRadialGradient(
+                        gcx + earthRadius * 0.5, gcy + earthRadius * 0.5, earthRadius * 0.2,
+                        gcx, gcy, earthRadius * 1.05
+                    );
+                    shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                    shadowGrad.addColorStop(0.65, 'rgba(2, 6, 23, 0.4)');
+                    shadowGrad.addColorStop(1, 'rgba(2, 6, 23, 0.92)');
+                    ctx.fillStyle = shadowGrad;
+                    ctx.beginPath();
+                    ctx.arc(gcx, gcy, earthRadius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.restore(); // End clipping
+
+                    // 3. Rayleigh Atmospheric Blue Scattering Rim Halo
+                    const atmosGrad = ctx.createRadialGradient(
+                        gcx, gcy, earthRadius * 0.96,
+                        gcx, gcy, earthRadius * 1.12
+                    );
+                    atmosGrad.addColorStop(0, 'rgba(56, 189, 248, 0.7)');
+                    atmosGrad.addColorStop(0.4, 'rgba(2, 132, 199, 0.35)');
+                    atmosGrad.addColorStop(0.8, 'rgba(14, 165, 233, 0.1)');
+                    atmosGrad.addColorStop(1, 'rgba(2, 6, 23, 0)');
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(gcx, gcy, earthRadius * 1.12, 0, Math.PI * 2);
+                    ctx.fillStyle = atmosGrad;
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // 4. Update HUD Telemetry
+                const hudAltitude = document.getElementById('hudAltitude');
+                const hudStage = document.getElementById('hudStage');
+                const hudVelocity = document.getElementById('hudVelocity');
+                const hudLockStatus = document.getElementById('hudLockStatus');
+                const hudCenterCoords = document.getElementById('hudCenterCoords');
+                const hudProgressFill = document.getElementById('hudProgressFill');
+
+                if (hudAltitude) {
+                    if (altitude >= 1000) {
+                        hudAltitude.textContent = (altitude / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' KM';
+                    } else {
+                        hudAltitude.textContent = altitude + ' M';
+                    }
+                }
+                if (hudVelocity) {
+                    hudVelocity.textContent = velocity.toLocaleString('en-US') + ' KM/H';
+                }
+                if (hudCenterCoords) {
+                    hudCenterCoords.textContent = `${currentLat.toFixed(2)}° N, ${currentLng.toFixed(2)}° E`;
+                }
+                if (hudProgressFill) {
+                    hudProgressFill.style.width = (progress * 100).toFixed(1) + '%';
+                }
+
+                // 5 Stages of Descent Description
+                if (hudStage) {
+                    if (progress < 0.18) {
+                        hudStage.textContent = "DEEP SPACE // HIGH ORBITAL APEX";
+                        if (hudLockStatus) { hudLockStatus.textContent = "ACQUIRING"; hudLockStatus.style.color = "var(--text-muted)"; }
+                    } else if (progress < 0.40) {
+                        hudStage.textContent = "ORBITAL DESCENT // ASIAN LANDMASS";
+                        if (hudLockStatus) { hudLockStatus.textContent = "TRACKING"; hudLockStatus.style.color = "var(--cyan)"; }
+                    } else if (progress < 0.70) {
+                        hudStage.textContent = "SUB-ORBITAL VECTOR // INDIAN PENINSULA";
+                        if (hudLockStatus) { hudLockStatus.textContent = "INTERCEPTING"; hudLockStatus.style.color = "var(--cyan)"; }
+                    } else if (progress < 0.88) {
+                        hudStage.textContent = "COASTAL RECON // ODISHA SECTOR";
+                        if (hudLockStatus) { hudLockStatus.textContent = "RADAR LOCK"; hudLockStatus.style.color = "var(--yellow)"; }
+                    } else {
+                        hudStage.textContent = "TACTICAL DESCENT // DHAMRA PORT (500M)";
+                        if (hudLockStatus) { hudLockStatus.textContent = "TERMINAL LOCK"; hudLockStatus.style.color = "var(--emerald)"; }
+                    }
+                }
+
+                // Loop or Complete
+                if (rawProgress < 1.0 && !cinematicState.skipped) {
+                    cinematicState.rafId = requestAnimationFrame(frame);
+                } else {
+                    completeCinematicTransition();
+                }
+            }
+
+            cinematicState.rafId = requestAnimationFrame(frame);
+        }
+
+        function completeCinematicTransition() {
+            const overlay = document.getElementById('spaceCinematicOverlay');
+            if (cinematicState.rafId) {
+                cancelAnimationFrame(cinematicState.rafId);
+                cinematicState.rafId = null;
+            }
+            cinematicState.active = false;
+
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 400);
+            }
+
+            // Smooth Leaflet Final Touchdown
+            if (map) {
+                map.invalidateSize();
+                map.flyTo([CINEMATIC_CONFIG.target.lat, CINEMATIC_CONFIG.target.lng], 9, {
+                    animate: true,
+                    duration: 1.2,
+                    easeLinearity: 0.25
+                });
+            }
+        }
+
+        function skipCinematicTransition() {
+            cinematicState.skipped = true;
+            completeCinematicTransition();
         }
     </script>
 </body>
