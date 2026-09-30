@@ -6,7 +6,7 @@ FastAPI Backend with Real-Time Surge Modeling, Infrastructure Graph Analysis & A
 import os
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -134,29 +134,56 @@ class SimulationRequest(BaseModel):
     tide_phase_m: float = 1.4
     rainfall_24h_mm: float = 280.0
 
-def get_index_html_path():
+def get_index_html_content():
     candidate_paths = [
         os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "index.html")),
         os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "index.html")),
         os.path.abspath(os.path.join(os.getcwd(), "output", "index.html")),
         os.path.abspath(os.path.join(os.getcwd(), "index.html")),
+        "output/index.html",
+        "index.html",
+        "/opt/render/project/src/index.html",
+        "/opt/render/project/src/output/index.html",
     ]
     for p in candidate_paths:
-        if os.path.exists(p) and os.path.isfile(p):
-            return p
+        try:
+            if os.path.exists(p) and os.path.isfile(p):
+                with open(p, "r", encoding="utf-8") as f:
+                    return f.read()
+        except Exception:
+            continue
     return None
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
+@app.get("/index.html", response_class=HTMLResponse)
 def read_root():
-    index_path = get_index_html_path()
-    if index_path:
-        return FileResponse(index_path, media_type="text/html")
-    return {
-        "status": "online",
-        "service": "AegisCyclone Risk & Vulnerability Modeling Platform",
-        "version": "1.0.0",
-        "notice": "Frontend dashboard available at index.html or API endpoints under /api/*"
-    }
+    content = get_index_html_content()
+    if content:
+        return HTMLResponse(content=content, status_code=200)
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>AegisCyclone Platform</title>
+        <style>
+            body { background: #070d18; color: #e2e8f0; font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+            .card { background: #0f172a; padding: 2.5rem; border-radius: 16px; border: 1px solid #1e293b; text-align: center; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+            h2 { color: #38bdf8; margin-top: 0; }
+            a { color: #38bdf8; text-decoration: none; font-weight: 600; }
+            a:hover { text-decoration: underline; }
+            .btn { display: inline-block; background: #0284c7; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; margin-top: 1rem; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h2>🛡️ AegisCyclone Backend API Online</h2>
+            <p>FastAPI service is running and ready to process simulation models and RAG advisory requests.</p>
+            <p><a href="/docs" class="btn">Explore API Docs (Swagger UI)</a></p>
+        </div>
+    </body>
+    </html>
+    """, status_code=200)
 
 @app.get("/api/health")
 def read_health():
