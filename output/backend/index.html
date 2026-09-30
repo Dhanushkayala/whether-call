@@ -6,6 +6,9 @@
     <title>AegisCyclone — Planetary Hydrodynamic & Infrastructure Vulnerability Command System</title>
     <link rel="icon" type="image/png" href="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202005_3346cc4d-ec3b-44ab-825c-b18e49f5021a.png">
 
+    <!-- Lordicon Interactive Icons CDN -->
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -544,6 +547,59 @@
             .planet-l { width: calc(85 * var(--u)); left: calc(-42 * var(--u)); top: calc(-16 * var(--u)); }
             .planet-r { width: calc(85 * var(--u)); right: calc(-42 * var(--u)); top: calc(-16 * var(--u)); }
         }
+
+        /* ══════════════════════════════════════════════════════════════ */
+        /* INTERACTIVE ANIMATED ICONS & MICRO-INTERACTIONS (Flaticon/Lordicon) */
+        /* ══════════════════════════════════════════════════════════════ */
+        .icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+        }
+        .icon-box:hover {
+            transform: scale(1.22) rotate(6deg);
+            filter: drop-shadow(0 0 10px var(--cyan));
+        }
+
+        @keyframes iconSpinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes iconCycloneVortex {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+        @keyframes iconPulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(121,220,232,0.6)); }
+            50% { transform: scale(1.18); filter: drop-shadow(0 0 14px var(--cyan)); }
+        }
+        @keyframes iconWaveFloat {
+            0%, 100% { transform: translateY(0) scaleY(1); }
+            50% { transform: translateY(-4px) scaleY(1.12); }
+        }
+        @keyframes iconBounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes iconElectricSpark {
+            0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 8px #eab308); }
+            25% { opacity: 0.7; transform: scale(0.95); filter: drop-shadow(0 0 2px #eab308); }
+            50% { opacity: 1; transform: scale(1.15) rotate(5deg); filter: drop-shadow(0 0 16px #f59e0b); }
+            75% { opacity: 0.85; transform: scale(1.05) rotate(-3deg); }
+        }
+        @keyframes sonarPing {
+            0% { transform: scale(0.7); opacity: 1; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        .anim-spin { animation: iconSpinSlow 12s linear infinite; display: inline-block; }
+        .anim-cyclone { animation: iconCycloneVortex 4s linear infinite; display: inline-block; }
+        .anim-pulse { animation: iconPulseGlow 2.2s ease-in-out infinite; display: inline-block; }
+        .anim-wave { animation: iconWaveFloat 2s ease-in-out infinite; display: inline-block; }
+        .anim-bounce { animation: iconBounceSoft 2.4s ease-in-out infinite; display: inline-block; }
+        .anim-electric { animation: iconElectricSpark 1.6s ease-in-out infinite; display: inline-block; }
     </style>
 </head>
 <body>
@@ -552,13 +608,36 @@
     <header class="navbar">
         <div class="navrow" id="mainNavRow" data-open="false">
             <a class="logo" href="#" onclick="switchPage('hero'); return false;">
+                <span class="icon-box anim-cyclone" style="margin-right:8px; color:var(--cyan);">🌀</span>
                 <span>aegis<i>cyclone</i></span>
                 <span class="logo-badge">SLOSH & CEA RAG</span>
             </a>
             <nav class="links" id="site-nav">
                 <button id="navHero" class="is-active" onclick="switchPage('hero')">
-                    <i data-lucide="globe" style="width:16px; height:16px; margin-right:6px; color:var(--cyan);"></i>
+                    <span class="icon-box anim-spin" style="margin-right:6px;"><i data-lucide="globe" style="width:16px; height:16px; color:var(--cyan);"></i></span>
                     Observatory
+                </button>
+                <button id="navMap" onclick="switchPage('map')">
+                    <span class="icon-box anim-pulse" style="margin-right:6px;"><i data-lucide="map" style="width:16px; height:16px; color:var(--cyan);"></i></span>
+                    GIS Command Map
+                </button>
+                <button id="navAnalytics" onclick="switchPage('analytics')">
+                    <span class="icon-box anim-wave" style="margin-right:6px;"><i data-lucide="activity" style="width:16px; height:16px; color:var(--cyan);"></i></span>
+                    Fragility & Surge
+                </button>
+                <button id="navMatrix" onclick="switchPage('matrix')">
+                    <span class="icon-box anim-bounce" style="margin-right:6px;"><i data-lucide="shield-alert" style="width:16px; height:16px; color:var(--cyan);"></i></span>
+                    NDMA SOPs & RAG
+                </button>
+                <button class="launch-btn" onclick="switchPage('map')">
+                    <span class="icon-box anim-pulse" style="margin-right:4px;">🚀</span> Launch GIS Map
+                </button>
+            </nav>
+            <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" onclick="toggleMobileNav()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
                 </button>
                 <button id="navMap" onclick="switchPage('map')">
                     <i data-lucide="map" style="width:16px; height:16px; margin-right:6px; color:var(--cyan);"></i>
@@ -638,11 +717,11 @@
                 <!-- Panel Header -->
                 <div class="glass-header" style="padding:14px 18px; display:flex; align-items:center; justify-content:space-between;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <i data-lucide="sliders" style="width:18px; height:18px; color:var(--cyan);"></i>
+                        <span class="icon-box anim-spin"><i data-lucide="sliders" style="width:18px; height:18px; color:var(--cyan);"></i></span>
                         <span style="font-weight:700; font-size:14px; letter-spacing:0.5px; text-transform:uppercase;">Control & Scenarios</span>
                     </div>
-                    <span id="backendIndicator" style="font-size:11px; font-family:var(--font-mono); color:var(--cyan); background:rgba(121,220,232,0.15); border:1px solid rgba(121,220,232,0.3); padding:2px 8px; border-radius:12px;">
-                        Render Live
+                    <span id="backendIndicator" style="font-size:11px; font-family:var(--font-mono); color:var(--cyan); background:rgba(121,220,232,0.15); border:1px solid rgba(121,220,232,0.3); padding:2px 8px; border-radius:12px; display:flex; align-items:center; gap:5px;">
+                        <span class="anim-pulse" style="width:6px; height:6px; border-radius:50%; background:var(--cyan);"></span> Render Live
                     </span>
                 </div>
 
@@ -651,8 +730,8 @@
 
                     <!-- Section 1: Cyclone Scenario Selection -->
                     <div style="background:rgba(4,16,31,0.6); border:1px solid rgba(121,220,232,0.18); border-radius:12px; padding:14px;">
-                        <label style="font-size:12px; font-weight:600; color:var(--cyan); display:block; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
-                            Active Cyclone Scenario
+                        <label style="font-size:12px; font-weight:600; color:var(--cyan); display:flex; align-items:center; gap:6px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                            <span class="icon-box anim-cyclone">🌀</span> Active Cyclone Scenario
                         </label>
                         <select id="scenarioSelect" onchange="loadScenario(this.value)" style="width:100%; background:#07152b; color:#fff; border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:8px 12px; font-size:13px; font-family:var(--font-body); outline:none; cursor:pointer;">
                             <option value="cyclone_dana">🌀 Cyclone Dana (VSCS - Odisha / Dhamra)</option>
@@ -665,14 +744,16 @@
                     <!-- Section 2: Hydrodynamic SLOSH Parameters -->
                     <div style="background:rgba(4,16,31,0.6); border:1px solid rgba(121,220,232,0.18); border-radius:12px; padding:14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <span style="font-size:12px; font-weight:600; color:var(--cyan); text-transform:uppercase; letter-spacing:0.5px;">Hydrodynamic Physics</span>
+                            <span style="font-size:12px; font-weight:600; color:var(--cyan); text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:6px;">
+                                <span class="icon-box anim-wave">🌊</span> Hydrodynamic Physics
+                            </span>
                             <button onclick="resetDefaultParams()" style="font-size:10px; color:var(--cyan); background:transparent; border:none; cursor:pointer; text-decoration:underline;">Reset</button>
                         </div>
 
                         <!-- Central Pressure -->
                         <div style="margin-bottom:12px;">
                             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                <span style="color:#94a3b8;">Central Pressure (ΔP)</span>
+                                <span style="color:#94a3b8; display:flex; align-items:center; gap:4px;"><i data-lucide="gauge" style="width:13px; height:13px; color:var(--cyan);"></i> Central Pressure (ΔP)</span>
                                 <span id="valPressure" style="font-family:var(--font-mono); font-weight:700; color:#fff;">980 hPa</span>
                             </div>
                             <input type="range" id="paramPressure" min="900" max="1010" value="980" oninput="updatePhysicsVal('Pressure', this.value, 'hPa')" style="width:100%; accent-color:var(--cyan);">
@@ -681,7 +762,7 @@
                         <!-- Max Wind Speed -->
                         <div style="margin-bottom:12px;">
                             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                <span style="color:#94a3b8;">Max Wind Speed (Vmax)</span>
+                                <span style="color:#94a3b8; display:flex; align-items:center; gap:4px;"><i data-lucide="wind" style="width:13px; height:13px; color:var(--cyan);"></i> Max Wind Speed (Vmax)</span>
                                 <span id="valWind" style="font-family:var(--font-mono); font-weight:700; color:#fff;">125 km/h</span>
                             </div>
                             <input type="range" id="paramWind" min="50" max="280" value="125" oninput="updatePhysicsVal('Wind', this.value, 'km/h')" style="width:100%; accent-color:var(--cyan);">
@@ -690,7 +771,7 @@
                         <!-- Radius of Max Winds -->
                         <div style="margin-bottom:12px;">
                             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                <span style="color:#94a3b8;">Radius of Max Winds (RMW)</span>
+                                <span style="color:#94a3b8; display:flex; align-items:center; gap:4px;"><i data-lucide="disc" style="width:13px; height:13px; color:var(--cyan);"></i> Radius of Max Winds (RMW)</span>
                                 <span id="valRmw" style="font-family:var(--font-mono); font-weight:700; color:#fff;">45 km</span>
                             </div>
                             <input type="range" id="paramRmw" min="15" max="100" value="45" oninput="updatePhysicsVal('Rmw', this.value, 'km')" style="width:100%; accent-color:var(--cyan);">
@@ -699,7 +780,7 @@
                         <!-- Forward Translation Speed -->
                         <div style="margin-bottom:12px;">
                             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                <span style="color:#94a3b8;">Forward Speed (Vf)</span>
+                                <span style="color:#94a3b8; display:flex; align-items:center; gap:4px;"><i data-lucide="fast-forward" style="width:13px; height:13px; color:var(--cyan);"></i> Forward Speed (Vf)</span>
                                 <span id="valSpeed" style="font-family:var(--font-mono); font-weight:700; color:#fff;">14 km/h</span>
                             </div>
                             <input type="range" id="paramSpeed" min="5" max="40" value="14" oninput="updatePhysicsVal('Speed', this.value, 'km/h')" style="width:100%; accent-color:var(--cyan);">
@@ -708,7 +789,7 @@
                         <!-- Tidal Phase Offset -->
                         <div>
                             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                <span style="color:#94a3b8;">Astronomical High Tide</span>
+                                <span style="color:#94a3b8; display:flex; align-items:center; gap:4px;"><i data-lucide="droplets" style="width:13px; height:13px; color:var(--cyan);"></i> Astronomical High Tide</span>
                                 <span id="valTide" style="font-family:var(--font-mono); font-weight:700; color:#fff;">+1.4 m</span>
                             </div>
                             <input type="range" id="paramTide" min="0.0" max="4.0" step="0.1" value="1.4" oninput="updatePhysicsVal('Tide', this.value, 'm')" style="width:100%; accent-color:var(--cyan);">
@@ -717,35 +798,35 @@
 
                     <!-- Section 3: GIS Layer Visibility Toggles -->
                     <div style="background:rgba(4,16,31,0.6); border:1px solid rgba(121,220,232,0.18); border-radius:12px; padding:14px;">
-                        <span style="font-size:12px; font-weight:600; color:var(--cyan); display:block; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
-                            Map Overlays & Critical Infrastructure
+                        <span style="font-size:12px; font-weight:600; color:var(--cyan); display:flex; align-items:center; gap:6px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
+                            <span class="icon-box anim-pulse"><i data-lucide="layers" style="width:14px; height:14px;"></i></span> Map Overlays & Critical Infrastructure
                         </span>
 
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                             <button id="togSurge" onclick="toggleLayer('surge')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(6,182,212,0.2); border:1px solid var(--cyan); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="waves" style="width:14px; height:14px; color:var(--cyan);"></i> Storm Surge
+                                <span class="icon-box anim-wave"><i data-lucide="waves" style="width:14px; height:14px; color:var(--cyan);"></i></span> Storm Surge
                             </button>
                             <button id="togGrid" onclick="toggleLayer('grid')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(234,179,8,0.2); border:1px solid #eab308; color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="zap" style="width:14px; height:14px; color:#eab308;"></i> CEA Power Grid
+                                <span class="icon-box anim-electric"><i data-lucide="zap" style="width:14px; height:14px; color:#eab308;"></i></span> CEA Power Grid
                             </button>
                             <button id="togTransects" onclick="toggleLayer('transects')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(168,85,247,0.2); border:1px solid #a855f7; color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="bar-chart-2" style="width:14px; height:14px; color:#a855f7;"></i> Bathymetry
+                                <span class="icon-box anim-pulse"><i data-lucide="bar-chart-2" style="width:14px; height:14px; color:#a855f7;"></i></span> Bathymetry
                             </button>
                             <button id="togShelters" onclick="toggleLayer('shelters')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="home" style="width:14px; height:14px; color:#10b981;"></i> NDMA Shelters
+                                <span class="icon-box anim-bounce"><i data-lucide="home" style="width:14px; height:14px; color:#10b981;"></i></span> NDMA Shelters
                             </button>
                             <button id="togFlights" onclick="toggleLayer('flights')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(14,165,233,0.2); border:1px solid #0ea5e9; color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="plane" style="width:14px; height:14px; color:#0ea5e9;"></i> Flight Radar
+                                <span class="icon-box anim-bounce"><i data-lucide="plane" style="width:14px; height:14px; color:#0ea5e9;"></i></span> Flight Radar
                             </button>
                             <button id="togTrack" onclick="toggleLayer('track')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(239,68,68,0.2); border:1px solid #ef4444; color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="target" style="width:14px; height:14px; color:#ef4444;"></i> Cyclone Eye
+                                <span class="icon-box anim-cyclone"><i data-lucide="target" style="width:14px; height:14px; color:#ef4444;"></i></span> Cyclone Eye
                             </button>
                         </div>
                     </div>
 
                     <!-- Trigger Simulation Button -->
-                    <button onclick="runSimulation()" style="width:100%; padding:12px; background:linear-gradient(180deg,#79dce8 0%, #0284c7 100%); color:#04101f; font-weight:700; font-size:14px; border:none; border-radius:10px; cursor:pointer; box-shadow:0 4px 15px rgba(121,220,232,0.4); display:flex; align-items:center; justify-content:center; gap:8px;">
-                        <i data-lucide="play" style="width:16px; height:16px;"></i>
+                    <button onclick="runSimulation()" style="width:100%; padding:12px; background:linear-gradient(180deg,#79dce8 0%, #0284c7 100%); color:#04101f; font-weight:700; font-size:14px; border:none; border-radius:10px; cursor:pointer; box-shadow:0 4px 15px rgba(121,220,232,0.4); display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .2s ease;">
+                        <span class="icon-box anim-pulse"><i data-lucide="play" style="width:16px; height:16px;"></i></span>
                         Execute Hydrodynamic Model
                     </button>
                 </div>
@@ -765,11 +846,11 @@
                     </select>
 
                     <button onclick="recenterMap()" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
-                        <i data-lucide="crosshair" style="width:14px; height:14px; color:var(--cyan);"></i> Recenter Landfall
+                        <span class="icon-box anim-pulse"><i data-lucide="crosshair" style="width:14px; height:14px; color:var(--cyan);"></i></span> Recenter Landfall
                     </button>
 
                     <button onclick="fetchLiveStationWeather(20.812, 86.974, 'Dhamra Coastal Radar')" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:var(--cyan); border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
-                        <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i> Sync Open-Meteo
+                        <span class="icon-box anim-spin"><i data-lucide="refresh-cw" style="width:14px; height:14px;"></i></span> Sync Open-Meteo
                     </button>
                 </div>
 
@@ -777,7 +858,7 @@
                 <div class="glass-panel" style="position:absolute; top:16px; right:16px; z-index:400; border-radius:12px; padding:12px 16px; min-width:340px; max-width:440px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(121,220,232,0.2); padding-bottom:8px; margin-bottom:10px;">
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span>
+                            <span class="anim-pulse" style="width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span>
                             <span id="weatherStationLabel" style="font-weight:700; font-size:13px; color:#fff;">Dhamra Coastal Radar</span>
                         </div>
                         <span id="wmoBadge" style="font-size:11px; font-family:var(--font-mono); color:var(--cyan); background:rgba(121,220,232,0.15); padding:2px 8px; border-radius:6px; border:1px solid rgba(121,220,232,0.3);">
@@ -787,19 +868,19 @@
 
                     <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; text-align:center; font-family:var(--font-mono);">
                         <div style="background:rgba(4,16,31,0.5); padding:8px 4px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                            <div style="font-size:10px; color:#94a3b8;">TEMP</div>
+                            <div style="font-size:10px; color:#94a3b8; display:flex; align-items:center; justify-content:center; gap:3px;"><span class="icon-box anim-pulse">🌡️</span> TEMP</div>
                             <div id="dispTemp" style="font-size:14px; font-weight:700; color:#f43f5e;">28.4°C</div>
                         </div>
                         <div style="background:rgba(4,16,31,0.5); padding:8px 4px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                            <div style="font-size:10px; color:#94a3b8;">WIND</div>
+                            <div style="font-size:10px; color:#94a3b8; display:flex; align-items:center; justify-content:center; gap:3px;"><span class="icon-box anim-spin">💨</span> WIND</div>
                             <div id="dispWind" style="font-size:14px; font-weight:700; color:var(--cyan);">125 km/h</div>
                         </div>
                         <div style="background:rgba(4,16,31,0.5); padding:8px 4px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                            <div style="font-size:10px; color:#94a3b8;">SURGE</div>
+                            <div style="font-size:10px; color:#94a3b8; display:flex; align-items:center; justify-content:center; gap:3px;"><span class="icon-box anim-wave">🌊</span> SURGE</div>
                             <div id="dispSurge" style="font-size:14px; font-weight:700; color:#a855f7;">3.85 m</div>
                         </div>
                         <div style="background:rgba(4,16,31,0.5); padding:8px 4px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                            <div style="font-size:10px; color:#94a3b8;">PRESSURE</div>
+                            <div style="font-size:10px; color:#94a3b8; display:flex; align-items:center; justify-content:center; gap:3px;"><span class="icon-box anim-pulse">⏲️</span> PRESSURE</div>
                             <div id="dispPressure" style="font-size:14px; font-weight:700; color:#eab308;">980 hPa</div>
                         </div>
                     </div>
@@ -828,30 +909,42 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(121,220,232,0.2); padding-bottom:12px;">
                 <div>
-                    <h2 style="font-family:var(--font-serif); font-size:28px; color:#fff;">Infrastructure Fragility & SLOSH Hydrodynamics</h2>
+                    <h2 style="font-family:var(--font-serif); font-size:28px; color:#fff; display:flex; align-items:center; gap:10px;">
+                        <span class="icon-box anim-wave"><i data-lucide="activity" style="width:26px; height:26px; color:var(--cyan);"></i></span>
+                        Infrastructure Fragility & SLOSH Hydrodynamics
+                    </h2>
                     <p style="font-size:14px; color:#94a3b8;">Non-linear vulnerability assessment & Monte Carlo risk distributions for coastal assets.</p>
                 </div>
-                <button onclick="exportAnalyticsPDF()" style="background:linear-gradient(180deg,#79dce8,#0284c7); color:var(--btn-ink); font-weight:700; border:none; border-radius:8px; padding:10px 18px; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                    <i data-lucide="download" style="width:16px; height:16px;"></i> Export Analytics Report
+                <button onclick="exportAnalyticsPDF()" style="background:linear-gradient(180deg,#79dce8,#0284c7); color:var(--btn-ink); font-weight:700; border:none; border-radius:8px; padding:10px 18px; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:transform .2s ease;">
+                    <span class="icon-box anim-bounce"><i data-lucide="download" style="width:16px; height:16px;"></i></span> Export Analytics Report
                 </button>
             </div>
 
             <!-- 3 Top Metric Cards -->
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px;">
                 <div class="glass-panel" style="padding:20px; border-radius:14px;">
-                    <div style="font-size:12px; font-weight:600; color:var(--cyan); text-transform:uppercase;">Peak Storm Surge Potential</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:12px; font-weight:600; color:var(--cyan); text-transform:uppercase;">Peak Storm Surge Potential</div>
+                        <span class="icon-box anim-wave" style="font-size:20px;">🌊</span>
+                    </div>
                     <div style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">3.85 <span style="font-size:16px; color:#94a3b8;">m Above MSL</span></div>
                     <div style="font-size:12px; color:#10b981;">+1.4m Astronomical Spring Tide Synchronized</div>
                 </div>
 
                 <div class="glass-panel" style="padding:20px; border-radius:14px;">
-                    <div style="font-size:12px; font-weight:600; color:#eab308; text-transform:uppercase;">Grid Failure Probability</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:12px; font-weight:600; color:#eab308; text-transform:uppercase;">Grid Failure Probability</div>
+                        <span class="icon-box anim-electric" style="font-size:20px;">⚡</span>
+                    </div>
                     <div style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">64.2% <span style="font-size:16px; color:#94a3b8;">Substations</span></div>
                     <div style="font-size:12px; color:#f43f5e;">14 High-Voltage Coastal Substations at Severe Risk</div>
                 </div>
 
                 <div class="glass-panel" style="padding:20px; border-radius:14px;">
-                    <div style="font-size:12px; font-weight:600; color:#a855f7; text-transform:uppercase;">Parametric SDRF Trigger</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:12px; font-weight:600; color:#a855f7; text-transform:uppercase;">Parametric SDRF Trigger</div>
+                        <span class="icon-box anim-pulse" style="font-size:20px;">🛡️</span>
+                    </div>
                     <div style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">$15,000,000</div>
                     <div style="font-size:12px; color:var(--cyan);">Automatic Disaster Payout Verification Active</div>
                 </div>
@@ -862,7 +955,7 @@
                 <!-- Bathymetry Surge Transect Chart -->
                 <div class="glass-panel" style="padding:20px; border-radius:14px;">
                     <h3 style="font-size:16px; font-weight:700; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-                        <i data-lucide="waves" style="width:18px; height:18px; color:var(--cyan);"></i>
+                        <span class="icon-box anim-wave"><i data-lucide="waves" style="width:18px; height:18px; color:var(--cyan);"></i></span>
                         Coastal Bathymetry & Surge Transect Profile
                     </h3>
                     <div style="height:260px; width:100%;">
@@ -873,7 +966,7 @@
                 <!-- Fragility Log-Normal Curves -->
                 <div class="glass-panel" style="padding:20px; border-radius:14px;">
                     <h3 style="font-size:16px; font-weight:700; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-                        <i data-lucide="zap" style="width:18px; height:18px; color:#eab308;"></i>
+                        <span class="icon-box anim-electric"><i data-lucide="zap" style="width:18px; height:18px; color:#eab308;"></i></span>
                         Power Grid & Structural Fragility Log-Normal Curves
                     </h3>
                     <div style="height:260px; width:100%;">
@@ -892,11 +985,14 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(121,220,232,0.2); padding-bottom:12px;">
                 <div>
-                    <h2 style="font-family:var(--font-serif); font-size:28px; color:#fff;">NDMA Standard Operating Procedures & AI RAG Agent</h2>
+                    <h2 style="font-family:var(--font-serif); font-size:28px; color:#fff; display:flex; align-items:center; gap:10px;">
+                        <span class="icon-box anim-bounce"><i data-lucide="shield-alert" style="width:26px; height:26px; color:var(--cyan);"></i></span>
+                        NDMA Standard Operating Procedures & AI RAG Agent
+                    </h2>
                     <p style="font-size:14px; color:#94a3b8;">Automated disaster action matrices indexing NDMA-EVAC-104 & CEA-SOP-502 standards.</p>
                 </div>
-                <button onclick="queryRAGAgent()" style="background:var(--cyan); color:var(--btn-ink); font-weight:700; border:none; border-radius:8px; padding:10px 18px; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                    <i data-lucide="bot" style="width:16px; height:16px;"></i> Re-Run AI RAG Analysis
+                <button onclick="queryRAGAgent()" style="background:var(--cyan); color:var(--btn-ink); font-weight:700; border:none; border-radius:8px; padding:10px 18px; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:transform .2s ease;">
+                    <span class="icon-box anim-spin"><i data-lucide="bot" style="width:16px; height:16px;"></i></span> Re-Run AI RAG Analysis
                 </button>
             </div>
 
@@ -906,10 +1002,14 @@
                 <!-- Mandatory Evacuation Directive -->
                 <div class="glass-panel" style="padding:22px; border-radius:14px; border-left:4px solid #ef4444;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <span style="font-size:11px; font-family:var(--font-mono); color:#ef4444; background:rgba(239,68,68,0.15); padding:2px 8px; border-radius:6px;">PRIORITY 1: IMMEDIATE</span>
+                        <span style="font-size:11px; font-family:var(--font-mono); color:#ef4444; background:rgba(239,68,68,0.15); padding:2px 8px; border-radius:6px; display:flex; align-items:center; gap:4px;">
+                            <span class="anim-pulse" style="width:6px; height:6px; border-radius:50%; background:#ef4444;"></span> PRIORITY 1: IMMEDIATE
+                        </span>
                         <span style="font-size:12px; color:#94a3b8;">NDMA-EVAC-104</span>
                     </div>
-                    <h4 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px;">Mandatory Coastal Evacuation (0-5 km)</h4>
+                    <h4 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                        <span class="icon-box anim-pulse">🚨</span> Mandatory Coastal Evacuation (0-5 km)
+                    </h4>
                     <p style="font-size:13px; color:#cbd5e1; line-height:1.6;">
                         Complete full evacuation of Dhamra Port, Chandbali, and low-lying coastal villages within 0-5 km zone before T-12h pre-landfall surge inundation reaches 1.5m threshold.
                     </p>
@@ -918,10 +1018,14 @@
                 <!-- Controlled Substation De-energization -->
                 <div class="glass-panel" style="padding:22px; border-radius:14px; border-left:4px solid #eab308;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <span style="font-size:11px; font-family:var(--font-mono); color:#eab308; background:rgba(234,179,8,0.15); padding:2px 8px; border-radius:6px;">PRIORITY 2: ELECTRICAL</span>
+                        <span style="font-size:11px; font-family:var(--font-mono); color:#eab308; background:rgba(234,179,8,0.15); padding:2px 8px; border-radius:6px; display:flex; align-items:center; gap:4px;">
+                            <span class="anim-pulse" style="width:6px; height:6px; border-radius:50%; background:#eab308;"></span> PRIORITY 2: ELECTRICAL
+                        </span>
                         <span style="font-size:12px; color:#94a3b8;">CEA-SOP-502</span>
                     </div>
-                    <h4 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px;">Substation Islanding & Controlled Shutdown</h4>
+                    <h4 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                        <span class="icon-box anim-electric">⚡</span> Substation Islanding & Controlled Shutdown
+                    </h4>
                     <p style="font-size:13px; color:#cbd5e1; line-height:1.6;">
                         Isolate and de-energize 220kV Dhamra Coastal Substation and 132kV Chandbali Grid Feeders at T-6h to prevent cascading transformer explosive failures.
                     </p>
@@ -930,10 +1034,14 @@
                 <!-- Emergency SDRF Payout Trigger -->
                 <div class="glass-panel" style="padding:22px; border-radius:14px; border-left:4px solid #10b981;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <span style="font-size:11px; font-family:var(--font-mono); color:#10b981; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:6px;">PRIORITY 3: RELIEF FUNDING</span>
+                        <span style="font-size:11px; font-family:var(--font-mono); color:#10b981; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:6px; display:flex; align-items:center; gap:4px;">
+                            <span class="anim-pulse" style="width:6px; height:6px; border-radius:50%; background:#10b981;"></span> PRIORITY 3: RELIEF FUNDING
+                        </span>
                         <span style="font-size:12px; color:#94a3b8;">NDRF-INS-2024</span>
                     </div>
-                    <h4 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px;">Parametric SDRF Automatic Liquidity</h4>
+                    <h4 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                        <span class="icon-box anim-bounce">💰</span> Parametric SDRF Automatic Liquidity
+                    </h4>
                     <p style="font-size:13px; color:#cbd5e1; line-height:1.6;">
                         Parametric triggers exceeded (Wind > 120 km/h, Surge > 3.0m). Direct $15M State Disaster Response liquidity released for immediate shelter provisions.
                     </p>
