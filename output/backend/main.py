@@ -7,6 +7,7 @@ import os
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import uvicorn
@@ -37,6 +38,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Resolve and Mount Static UI directories if available
+UI_CANDIDATE_PATHS = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "UI")),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "UI")),
+    os.path.abspath(os.path.join(os.getcwd(), "output", "UI")),
+    os.path.abspath(os.path.join(os.getcwd(), "UI")),
+]
+for ui_dir in UI_CANDIDATE_PATHS:
+    if os.path.exists(ui_dir) and os.path.isdir(ui_dir):
+        app.mount("/UI", StaticFiles(directory=ui_dir), name="ui_assets")
+        break
 
 infra_engine = InfrastructureEngine()
 
@@ -121,14 +134,34 @@ class SimulationRequest(BaseModel):
     tide_phase_m: float = 1.4
     rainfall_24h_mm: float = 280.0
 
-INDEX_HTML_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "index.html"))
+def get_index_html_path():
+    candidate_paths = [
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "index.html")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "index.html")),
+        os.path.abspath(os.path.join(os.getcwd(), "output", "index.html")),
+        os.path.abspath(os.path.join(os.getcwd(), "index.html")),
+    ]
+    for p in candidate_paths:
+        if os.path.exists(p) and os.path.isfile(p):
+            return p
+    return None
 
 @app.get("/")
 def read_root():
-    if os.path.exists(INDEX_HTML_PATH):
-        return FileResponse(INDEX_HTML_PATH)
+    index_path = get_index_html_path()
+    if index_path:
+        return FileResponse(index_path, media_type="text/html")
     return {
         "status": "online",
+        "service": "AegisCyclone Risk & Vulnerability Modeling Platform",
+        "version": "1.0.0",
+        "notice": "Frontend dashboard available at index.html or API endpoints under /api/*"
+    }
+
+@app.get("/api/health")
+def read_health():
+    return {
+        "status": "healthy",
         "service": "AegisCyclone Risk & Vulnerability Modeling Platform",
         "version": "1.0.0"
     }
