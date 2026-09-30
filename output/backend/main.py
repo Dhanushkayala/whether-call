@@ -201,6 +201,17 @@ def read_health():
         "version": "1.0.0"
     }
 
+@app.get("/api/config")
+def read_config():
+    """Provides client tile service keys and environment endpoints."""
+    return {
+        "status": "configured",
+        "map_api_key": os.getenv("MAP_API_KEY", ""),
+        "nasa_api_key": os.getenv("NASA_API_KEY", ""),
+        "aviation_api_key": os.getenv("AVIATION_API_KEY", ""),
+        "google_api_key": os.getenv("GOOGLE_API_KEY", "")
+    }
+
 @app.get("/api/info")
 def read_info():
     return {

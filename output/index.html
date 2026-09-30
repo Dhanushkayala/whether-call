@@ -755,15 +755,21 @@
             <main style="flex:1; height:100%; position:relative;">
 
                 <!-- Top Map Quick Action HUD -->
-                <div style="position:absolute; top:16px; left:16px; z-index:400; display:flex; gap:10px; align-items:center;">
-                    <select id="baseMapSelect" onchange="switchBaseMap(this.value)" style="background:rgba(9,21,42,0.9); backdrop-filter:blur(10px); color:var(--cyan); border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; outline:none;">
-                        <option value="dark">🌑 Dark Matter GIS (CARTO)</option>
-                        <option value="satellite">🛰️ ESRI World Imagery</option>
+                <div style="position:absolute; top:16px; left:16px; z-index:400; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <select id="baseMapSelect" onchange="switchBaseMap(this.value)" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:var(--cyan); border:1px solid rgba(121,220,232,0.4); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; outline:none; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                        <option value="geoapify">🌑 Geoapify Dark Matter GIS (Active API)</option>
+                        <option value="carto">🌌 CARTO Dark Matter Standard</option>
+                        <option value="nasa">🛰️ NASA GIBS VIIRS Satellite (NASA Key)</option>
+                        <option value="satellite">🌍 ESRI High-Res World Imagery</option>
                         <option value="osm">🗺️ OpenStreetMap Standard</option>
                     </select>
 
-                    <button onclick="recenterMap()" style="background:rgba(9,21,42,0.9); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                        <i data-lucide="crosshair" style="width:14px; height:14px; color:var(--cyan);"></i> Recenter
+                    <button onclick="recenterMap()" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                        <i data-lucide="crosshair" style="width:14px; height:14px; color:var(--cyan);"></i> Recenter Landfall
+                    </button>
+
+                    <button onclick="fetchLiveStationWeather(20.812, 86.974, 'Dhamra Coastal Radar')" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:var(--cyan); border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                        <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i> Sync Open-Meteo
                     </button>
                 </div>
 
@@ -992,6 +998,38 @@
 
         const BACKEND_URL = getBackendUrl();
 
+        // Dynamic Key Store (Resolved securely via backend /api/config or runtime storage)
+        let MAP_API_KEY = localStorage.getItem('MAP_API_KEY') || '';
+        let NASA_API_KEY = localStorage.getItem('NASA_API_KEY') || '';
+        let AVIATION_API_KEY = localStorage.getItem('AVIATION_API_KEY') || '';
+        let GOOGLE_API_KEY = localStorage.getItem('GOOGLE_API_KEY') || '';
+
+        async function fetchRuntimeConfig() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/config`);
+                if (res.ok) {
+                    const cfg = await res.json();
+                    if (cfg.map_api_key) MAP_API_KEY = cfg.map_api_key;
+                    if (cfg.nasa_api_key) NASA_API_KEY = cfg.nasa_api_key;
+                    if (cfg.aviation_api_key) AVIATION_API_KEY = cfg.aviation_api_key;
+                    if (cfg.google_api_key) GOOGLE_API_KEY = cfg.google_api_key;
+                }
+            } catch (e) {
+                console.warn('Backend config loader notice:', e);
+            }
+        }
+
+        // WMO Standard Weather Code Notations
+        const WMO_NOTATIONS = {
+            0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+            45: "Fog", 48: "Depositing rime fog", 51: "Light drizzle", 53: "Moderate drizzle", 55: "Dense drizzle",
+            56: "Light freezing drizzle", 57: "Dense freezing drizzle", 61: "Slight rain", 63: "Moderate rain",
+            65: "Heavy rain", 66: "Light freezing rain", 67: "Heavy freezing rain", 71: "Slight snowfall",
+            73: "Moderate snowfall", 75: "Heavy snowfall", 77: "Snow grains", 80: "Slight rain showers",
+            81: "Moderate rain showers", 82: "Violent rain showers", 85: "Slight snow showers", 86: "Heavy snow showers",
+            95: "Thunderstorm", 96: "Thunderstorm with slight hail", 97: "Heavy thunderstorm", 99: "Thunderstorm with heavy hail"
+        };
+
         // State Store
         let activePage = 'hero';
         let map = null;
@@ -1003,7 +1041,9 @@
 
         // Leaflet Layer Groups
         let layerGroups = {
-            baseDark: null,
+            baseGeoapify: null,
+            baseCarto: null,
+            baseNasa: null,
             baseSat: null,
             baseOsm: null,
             surge: L.layerGroup(),
@@ -1011,7 +1051,8 @@
             transects: L.layerGroup(),
             shelters: L.layerGroup(),
             flights: L.layerGroup(),
-            track: L.layerGroup()
+            track: L.layerGroup(),
+            stations: L.layerGroup()
         };
 
         // Entrance Animation Kickoff
@@ -1040,6 +1081,7 @@
             }
 
             checkBackendHealth();
+            fetchRuntimeConfig();
         });
 
         // Backend Health Probe
@@ -1107,28 +1149,71 @@
                 attributionControl: false
             });
 
-            // Base Layers
-            layerGroups.baseDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-            layerGroups.baseSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
-            layerGroups.baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+            // Base Layers using user-provided API Keys
+            layerGroups.baseGeoapify = L.tileLayer(`https://maps.geoapify.com/v1/tile/dark-matter-purple-roads/{z}/{x}/{y}.png?apiKey=${MAP_API_KEY}`, { maxZoom: 19, attribution: '© Geoapify © OpenStreetMap' });
+            layerGroups.baseCarto = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '© CARTO' });
+            layerGroups.baseNasa = L.tileLayer(`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg?api_key=${NASA_API_KEY}`, { maxZoom: 9, attribution: '© NASA Earthdata / GIBS' });
+            layerGroups.baseSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: '© Esri, Earthstar Geographics' });
+            layerGroups.baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' });
+
+            // Set default active base map (Geoapify Dark Matter GIS)
+            layerGroups.baseGeoapify.addTo(map);
 
             // Add Default Overlay Layers
-            Object.values(layerGroups).forEach(lg => {
-                if (lg && lg !== layerGroups.baseSat && lg !== layerGroups.baseOsm) lg.addTo(map);
+            ['surge', 'grid', 'transects', 'shelters', 'flights', 'track', 'stations'].forEach(name => {
+                if (layerGroups[name]) layerGroups[name].addTo(map);
+            });
+
+            // Interactive Click Handler for Real-Time Open-Meteo Weather Decoding
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lon = e.latlng.lng;
+                fetchLiveStationWeather(lat, lon, `Custom GIS Target [${lat.toFixed(2)}, ${lon.toFixed(2)}]`);
             });
 
             renderMapLayers();
+            fetchLiveStationWeather(20.812, 86.974, 'Dhamra Coastal Radar');
         }
 
         function switchBaseMap(type) {
             if (!map) return;
-            map.removeLayer(layerGroups.baseDark);
-            map.removeLayer(layerGroups.baseSat);
-            map.removeLayer(layerGroups.baseOsm);
+            [layerGroups.baseGeoapify, layerGroups.baseCarto, layerGroups.baseNasa, layerGroups.baseSat, layerGroups.baseOsm].forEach(l => {
+                if (l && map.hasLayer(l)) map.removeLayer(l);
+            });
 
-            if (type === 'satellite') layerGroups.baseSat.addTo(map);
+            if (type === 'geoapify') layerGroups.baseGeoapify.addTo(map);
+            else if (type === 'carto') layerGroups.baseCarto.addTo(map);
+            else if (type === 'nasa') layerGroups.baseNasa.addTo(map);
+            else if (type === 'satellite') layerGroups.baseSat.addTo(map);
             else if (type === 'osm') layerGroups.baseOsm.addTo(map);
-            else layerGroups.baseDark.addTo(map);
+            else layerGroups.baseGeoapify.addTo(map);
+        }
+
+        async function fetchLiveStationWeather(lat, lon, label) {
+            const stationLabel = document.getElementById('weatherStationLabel');
+            if (stationLabel) stationLabel.textContent = label || `Station [${lat.toFixed(2)}, ${lon.toFixed(2)}]`;
+
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,surface_pressure,wind_speed_10m,wind_gusts_10m&timezone=auto`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    const cur = data.current || {};
+                    const wmoCode = cur.weather_code !== undefined ? cur.weather_code : 0;
+                    const wmoText = WMO_NOTATIONS[wmoCode] || "Observed coastal weather";
+
+                    const temp = cur.temperature_2m !== undefined ? cur.temperature_2m.toFixed(1) : '28.4';
+                    const wind = cur.wind_speed_10m !== undefined ? cur.wind_speed_10m.toFixed(0) : '125';
+                    const pressure = cur.surface_pressure !== undefined ? cur.surface_pressure.toFixed(0) : '980';
+
+                    document.getElementById('dispTemp').textContent = `${temp}°C`;
+                    document.getElementById('dispWind').textContent = `${wind} km/h`;
+                    document.getElementById('dispPressure').textContent = `${pressure} hPa`;
+                    document.getElementById('wmoBadge').textContent = `WMO ${wmoCode}: ${wmoText}`;
+                }
+            } catch (err) {
+                console.warn('Open-Meteo direct fetch notice:', err);
+            }
         }
 
         function recenterMap() {
@@ -1149,7 +1234,9 @@
 
         // Render Comprehensive GIS Layers
         function renderMapLayers() {
-            // 1. Storm Surge Inundation Polygon
+            const backendUrl = getBackendUrl();
+
+            // 1. Storm Surge Inundation Polygon (SLOSH model)
             layerGroups.surge.clearLayers();
             const surgePoly = L.polygon([
                 [20.45, 86.60], [20.70, 86.90], [21.10, 87.20], [21.30, 87.50],
@@ -1162,34 +1249,114 @@
             }).bindPopup('<b>Storm Surge Inundation Zone (SLOSH Model)</b><br>Peak Surge: 3.85m MSL<br>Inundation Extent: 4.2 km Inland');
             layerGroups.surge.addLayer(surgePoly);
 
-            // 2. India Power Grid 400kV & 220kV Lines
+            // 2. India Power Grid 765kV / 400kV / 220kV / 132kV from Overpass Turbo dataset
             layerGroups.grid.clearLayers();
-            const gridLines = [
-                [[20.81, 86.97], [20.29, 85.82]],
-                [[20.81, 86.97], [21.49, 86.93]],
-                [[21.49, 86.93], [22.57, 88.36]]
-            ];
-            gridLines.forEach(line => {
-                const pl = L.polyline(line, { color: '#eab308', weight: 3, dashArray: '6, 6' })
-                    .bindPopup('<b>CEA National Grid 400kV Interconnect</b><br>Operating Status: Islanding Alert (CEA-SOP-502)');
-                layerGroups.grid.addLayer(pl);
-            });
+            fetch(`${backendUrl}/api/power-grid/india-network`)
+                .then(r => r.ok ? r.json() : null)
+                .then(dataset => {
+                    if (!dataset || !dataset.transmission_lines) {
+                        // Fallback static lines if backend unavailable
+                        const gridLines = [
+                            [[20.81, 86.97], [20.29, 85.82]],
+                            [[20.81, 86.97], [21.49, 86.93]],
+                            [[21.49, 86.93], [22.57, 88.36]]
+                        ];
+                        gridLines.forEach(line => {
+                            const pl = L.polyline(line, { color: '#eab308', weight: 3, dashArray: '6, 6' })
+                                .bindPopup('<b>CEA National Grid 400kV Interconnect</b><br>Operating Status: Islanding Alert (CEA-SOP-502)');
+                            layerGroups.grid.addLayer(pl);
+                        });
+                        return;
+                    }
 
-            // Substations
-            const substations = [
-                { name: 'Dhamra 220kV Substation', lat: 20.81, lon: 86.97, status: 'Severe Risk' },
-                { name: 'Bhubaneswar 400kV Grid Station', lat: 20.29, lon: 85.82, status: 'Operational' },
-                { name: 'Balasore 220kV Substation', lat: 21.49, lon: 86.93, status: 'Moderate Risk' }
-            ];
-            substations.forEach(sub => {
-                const marker = L.circleMarker([sub.lat, sub.lon], {
-                    radius: 7,
-                    color: '#eab308',
-                    fillColor: '#eab308',
-                    fillOpacity: 0.9
-                }).bindPopup(`<b>${sub.name}</b><br>Vulnerability: ${sub.status}`);
-                layerGroups.grid.addLayer(marker);
-            });
+                    // Render transmission lines with voltage-based coloring
+                    const voltageColors = {
+                        '765': '#f59e0b',
+                        '400': '#f59e0b',
+                        '220': '#eab308',
+                        '132': '#d4a373',
+                        'default': '#eab308'
+                    };
+
+                    dataset.transmission_lines.forEach(line => {
+                        let coords = null;
+                        let name = 'CEA Transmission Line';
+                        let voltage = '400kV';
+
+                        // Handle different dataset shapes (GeoJSON-like or array of coords)
+                        if (line.geometry && line.geometry.coordinates) {
+                            coords = line.geometry.coordinates.map(c => [c[1], c[0]]);
+                            name = line.properties ? line.properties.name || name : name;
+                            voltage = line.properties ? (line.properties.voltage || voltage) : voltage;
+                        } else if (Array.isArray(line.coords)) {
+                            coords = line.coords;
+                            name = line.name || name;
+                            voltage = line.voltage || voltage;
+                        } else if (Array.isArray(line)) {
+                            // Already in [lat, lon] format
+                            coords = line;
+                        } else if (line.start && line.end) {
+                            coords = [line.start, line.end];
+                            name = line.name || name;
+                            voltage = line.voltage || voltage;
+                        }
+
+                        if (!coords || coords.length === 0) return;
+
+                        const colorKey = Object.keys(voltageColors).find(k => k === String(voltage).replace('kV','') || String(voltage).includes(k));
+                        const color = voltageColors[colorKey] || voltageColors['default'];
+
+                        const pl = L.polyline(coords, {
+                            color: color,
+                            weight: voltage.includes('765') ? 4 : 3,
+                            dashArray: voltage.includes('765') ? '8, 4' : '6, 6',
+                            opacity: 0.9
+                        }).bindPopup(`<b>${name}</b><br>Voltage: ${voltage}<br><b>CEA Grid Status</b><br>Operating Mode: ${voltage.includes('400') ? 'Islanding Alert (CEA-SOP-502)' : 'Active Monitoring'}`);
+                        layerGroups.grid.addLayer(pl);
+                    });
+
+                    // Render substations
+                    dataset.substations.forEach(sub => {
+                        const lat = sub.lat || (sub.geometry && sub.geometry.coordinates ? sub.geometry.coordinates[1] : null);
+                        const lon = sub.lon || (sub.geometry && sub.geometry.coordinates ? sub.geometry.coordinates[0] : null);
+                        if (!lat || !lon) return;
+
+                        const voltageColors = {
+                            '765': '#f59e0b',
+                            '400': '#f59e0b',
+                            '220': '#eab308',
+                            '132': '#d4a373'
+                        };
+                        const voltageKey = String(sub.voltage || '').replace('kV','');
+                        const color = voltageColors[voltageKey] || '#eab308';
+                        const radius = voltageKey === '765' ? 10 : voltageKey === '400' ? 8 : 7;
+
+                        const marker = L.circleMarker([lat, lon], {
+                            radius: radius,
+                            color: color,
+                            fillColor: color,
+                            fillOpacity: 0.95,
+                            weight: 1.5
+                        }).bindPopup(`<b>${sub.name || sub.id || 'Substation'}</b><br>${sub.voltage || 'Unknown kV'}<br>Vulnerability: ${sub.status || 'N/A'}`);
+                        layerGroups.grid.addLayer(marker);
+                    });
+                }).catch(() => {
+                    // Network error — fallback static substation markers
+                    const substations = [
+                        { name: 'Dhamra 220kV Substation', lat: 20.81, lon: 86.97, status: 'Severe Risk' },
+                        { name: 'Bhubaneswar 400kV Grid Station', lat: 20.29, lon: 85.82, status: 'Operational' },
+                        { name: 'Balasore 220kV Substation', lat: 21.49, lon: 86.93, status: 'Moderate Risk' }
+                    ];
+                    substations.forEach(sub => {
+                        const marker = L.circleMarker([sub.lat, sub.lon], {
+                            radius: 7,
+                            color: '#eab308',
+                            fillColor: '#eab308',
+                            fillOpacity: 0.9
+                        }).bindPopup(`<b>${sub.name}</b><br>Vulnerability: ${sub.status}`);
+                        layerGroups.grid.addLayer(marker);
+                    });
+                });
 
             // 3. Cyclone Track & Eye Marker
             layerGroups.track.clearLayers();
@@ -1224,6 +1391,71 @@
                     fillOpacity: 0.9
                 }).bindPopup(`<b>${s.name}</b><br>Capacity: ${s.cap}`);
                 layerGroups.shelters.addLayer(marker);
+            });
+
+            // 5. Live Flight Radar (AviationStack API)
+            layerGroups.flights.clearLayers();
+            fetch(`${backendUrl}/api/live-flights`)
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data || !data.active_flights) return;
+                    data.active_flights.forEach(f => {
+                        if (f.status === 'GROUND' || f.status === 0) return;
+
+                        const flightIcon = L.divIcon({
+                            className: 'flight-icon',
+                            html: `<div style="width:14px; height:14px; background:${f.alert.includes('Reroute') ? '#3b82f6' : '#10b981'}; border-radius:50%; border:2px solid #fff; box-shadow:0 0 8px #fff;"></div>`,
+                            iconSize: [14, 14],
+                            iconAnchor: [7, 7]
+                        });
+                        const marker = L.marker([f.lat, f.lon], { icon: flightIcon })
+                            .bindPopup(`<b>${f.callsign || f.flight_iata}</b><br>${f.airline} • ${f.aircraft}<br>Status: ${f.status}<br>Speed: ${f.speed_kts} kts<br>Alert: ${f.alert}`);
+                        layerGroups.flights.addLayer(marker);
+                    });
+                }).catch(() => {});
+
+            // 6. Bathymetry Transects (from backend infrastructure engine)
+            layerGroups.transects.clearLayers();
+            fetch(`${backendUrl}/api/infrastructure`)
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data || !data.coastal_transect) return;
+                    // If transect has geo points, render as polyline
+                    const coords = data.coastal_transect.geo_points || data.coastal_transect.points;
+                    if (coords && coords.length > 1) {
+                        L.polyline(coords, { color: '#79dce8', weight: 2, opacity: 0.6, dashArray: '4,4' })
+                            .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Cross-Section Depth')
+                            .addTo(layerGroups.transects);
+                    }
+                }).catch(() => {
+                    // Fallback static transect line
+                    const transectCoords = [[20.45, 86.6], [20.8, 86.95], [20.5, 87.3]];
+                    L.polyline(transectCoords, { color: '#79dce8', weight: 2, opacity: 0.6, dashArray: '4,4' })
+                        .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Cross-Section Depth')
+                        .addTo(layerGroups.transects);
+                });
+
+            // 7. Coastal Weather Stations (Live Open-Meteo Synoptic Stations)
+            layerGroups.stations.clearLayers();
+            const weatherStations = [
+                { name: 'Dhamra Coastal Doppler Radar', lat: 20.812, lon: 86.974, type: 'Doppler Radar' },
+                { name: 'Paradip Port Meteorological Station', lat: 20.316, lon: 86.611, type: 'Port Met' },
+                { name: 'Chandbali Warning Center', lat: 20.781, lon: 86.745, type: 'IMD Station' },
+                { name: 'Balasore Coastal Station', lat: 21.494, lon: 86.931, type: 'IMD Coastal' },
+                { name: 'Digha Coastal Observatory', lat: 21.626, lon: 87.507, type: 'Marine Met' },
+                { name: 'Sagar Island Met Observatory', lat: 21.651, lon: 88.077, type: 'Island Radar' }
+            ];
+            weatherStations.forEach(st => {
+                const stationIcon = L.divIcon({
+                    className: 'station-marker',
+                    html: '<div style="width:12px; height:12px; background:#10b981; border-radius:50%; border:2px solid #fff; box-shadow:0 0 10px #10b981;"></div>',
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                });
+                const marker = L.marker([st.lat, st.lon], { icon: stationIcon })
+                    .bindPopup(`<b>${st.name}</b><br>Type: ${st.type}<br><button onclick="fetchLiveStationWeather(${st.lat}, ${st.lon}, '${st.name}')" style="margin-top:6px; background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Sync Live Telemetry</button>`);
+                marker.on('click', () => fetchLiveStationWeather(st.lat, st.lon, st.name));
+                layerGroups.stations.addLayer(marker);
             });
         }
 
