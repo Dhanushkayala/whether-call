@@ -136,20 +136,28 @@ class SimulationRequest(BaseModel):
 
 def get_index_html_content():
     candidate_paths = [
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "index.html")),
         os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "index.html")),
         os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "index.html")),
-        os.path.abspath(os.path.join(os.getcwd(), "output", "index.html")),
         os.path.abspath(os.path.join(os.getcwd(), "index.html")),
-        "output/index.html",
+        os.path.abspath(os.path.join(os.getcwd(), "output", "index.html")),
+        os.path.abspath(os.path.join(os.getcwd(), "output", "backend", "index.html")),
         "index.html",
+        "output/index.html",
+        "output/backend/index.html",
         "/opt/render/project/src/index.html",
         "/opt/render/project/src/output/index.html",
+        "/opt/render/project/src/output/backend/index.html",
+        "/app/index.html",
+        "/app/output/index.html",
     ]
     for p in candidate_paths:
         try:
             if os.path.exists(p) and os.path.isfile(p):
                 with open(p, "r", encoding="utf-8") as f:
-                    return f.read()
+                    data = f.read()
+                    if len(data) > 500:
+                        return data
         except Exception:
             continue
     return None
