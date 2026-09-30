@@ -1,5 +1,5 @@
 """
-AegisCyclone - Cyclone Impact & Infrastructure Vulnerability Forecaster API Server
+WeatherCall - Cyclone Impact & Infrastructure Vulnerability Forecaster API Server
 FastAPI Backend with Real-Time Surge Modeling, Infrastructure Graph Analysis & Advisory Dispatch
 """
 
@@ -25,7 +25,7 @@ rag_agent = DisasterRAGDecisionAgent(
 )
 
 app = FastAPI(
-    title="AegisCyclone API",
+    title="WeatherCall API",
     description="AI-Powered Cyclone Storm Surge, Infrastructure Vulnerability & Early-Warning Advisory System",
     version="1.0.0"
 )
@@ -173,7 +173,7 @@ def read_root():
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>AegisCyclone Platform</title>
+        <title>WeatherCall Platform</title>
         <style>
             body { background: #070d18; color: #e2e8f0; font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
             .card { background: #0f172a; padding: 2.5rem; border-radius: 16px; border: 1px solid #1e293b; text-align: center; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
@@ -185,7 +185,7 @@ def read_root():
     </head>
     <body>
         <div class="card">
-            <h2>🛡️ AegisCyclone Backend API Online</h2>
+            <h2>🛡️ WeatherCall Backend API Online</h2>
             <p>FastAPI service is running and ready to process simulation models and RAG advisory requests.</p>
             <p><a href="/docs" class="btn">Explore API Docs (Swagger UI)</a></p>
         </div>
@@ -197,7 +197,7 @@ def read_root():
 def read_health():
     return {
         "status": "healthy",
-        "service": "AegisCyclone Risk & Vulnerability Modeling Platform",
+        "service": "WeatherCall Risk & Vulnerability Modeling Platform",
         "version": "1.0.0"
     }
 
@@ -216,7 +216,7 @@ def read_config():
 def read_info():
     return {
         "status": "online",
-        "service": "AegisCyclone Risk & Vulnerability Modeling Platform",
+        "service": "WeatherCall Risk & Vulnerability Modeling Platform",
         "version": "1.0.0",
         "endpoints": [
             "/",
@@ -559,7 +559,7 @@ def get_live_weather(lat: float = Query(20.812, description="Latitude"), lon: fl
     url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,surface_pressure,wind_speed_10m,wind_gusts_10m&hourly=temperature_2m,precipitation,rain,weather_code,wind_speed_10m&timezone=auto"
 
     try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'AegisCyclone-Meteorology/1.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'WeatherCall-Meteorology/1.0'})
         with urllib.request.urlopen(req, timeout=5) as response:
             data = json.loads(response.read().decode())
             current = data.get("current", {})
@@ -590,7 +590,7 @@ def get_live_weather(lat: float = Query(20.812, description="Latitude"), lon: fl
     except Exception as e:
         # Fallback simulation when external API is unreachable
         return {
-            "source": "AegisCyclone Weather Model (Local Simulation)",
+            "source": "WeatherCall Weather Model (Local Simulation)",
             "coordinates": {"lat": lat, "lon": lon},
             "temperature_c": 27.4,
             "apparent_temperature_c": 32.1,

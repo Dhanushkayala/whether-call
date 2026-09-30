@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AegisCyclone — Planetary Hydrodynamic & Infrastructure Vulnerability Command System</title>
+    <title>WeatherCall — Planetary Hydrodynamic & Infrastructure Vulnerability Command System</title>
     <link rel="icon" type="image/png" href="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202005_3346cc4d-ec3b-44ab-825c-b18e49f5021a.png">
 
     <!-- Lordicon Interactive Icons CDN -->
@@ -447,6 +447,183 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* Custom Animated GIS Vector Markers */
+        @keyframes radarSweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes iconCycloneVortex {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.08); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        @keyframes iconElectricSpark {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px var(--cyan)) drop-shadow(0 0 8px rgba(121,220,232,0.8)); }
+            50% { transform: scale(1.15) rotate(4deg); filter: drop-shadow(0 0 8px #f59e0b) drop-shadow(0 0 16px rgba(245,158,11,0.9)); }
+        }
+        @keyframes iconPulseGlow {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(121, 220, 232, 0.85); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(121, 220, 232, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(121, 220, 232, 0); }
+        }
+        @keyframes iconWaveFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-4px) scale(1.06); }
+        }
+        @keyframes energyFlow {
+            0% { stroke-dashoffset: 48; }
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes flightGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px var(--cyan)); }
+            50% { transform: scale(1.14); filter: drop-shadow(0 0 10px #38bdf8); }
+        }
+
+        .map-anim-eye {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.9) 0%, rgba(15, 23, 42, 0.95) 70%);
+            border: 2px solid var(--cyan);
+            box-shadow: 0 0 20px var(--cyan), 0 0 35px rgba(239, 68, 68, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: iconCycloneVortex 4s linear infinite, pulse-ring 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            cursor: pointer;
+        }
+        .map-anim-eye svg {
+            width: 18px;
+            height: 18px;
+            color: #ffffff;
+        }
+
+        .map-anim-substation {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: rgba(9, 21, 42, 0.92);
+            border: 1.5px solid var(--cyan);
+            box-shadow: 0 0 12px rgba(121, 220, 232, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: iconElectricSpark 2s ease-in-out infinite;
+            cursor: pointer;
+        }
+        .map-anim-substation svg {
+            width: 14px;
+            height: 14px;
+            color: var(--cyan);
+        }
+
+        .map-anim-shelter {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(6, 78, 59, 0.9);
+            border: 1.5px solid var(--cyan);
+            box-shadow: 0 0 12px var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: iconPulseGlow 2.5s infinite;
+            cursor: pointer;
+        }
+        .map-anim-shelter svg {
+            width: 14px;
+            height: 14px;
+            color: #a7f3d0;
+        }
+
+        .map-anim-radar {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(9, 21, 42, 0.92);
+            border: 1.5px solid var(--cyan);
+            box-shadow: 0 0 12px var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .map-anim-radar::before {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            border: 1.5px dashed var(--cyan);
+            opacity: 0.7;
+            animation: radarSweep 3s linear infinite;
+        }
+        .map-anim-radar svg {
+            width: 15px;
+            height: 15px;
+            color: var(--cyan);
+        }
+
+        .map-anim-flight {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(9, 21, 42, 0.95);
+            border: 1.5px solid #38bdf8;
+            box-shadow: 0 0 10px #38bdf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: flightGlow 2s ease-in-out infinite;
+            cursor: pointer;
+        }
+        .map-anim-flight svg {
+            width: 13px;
+            height: 13px;
+            color: #38bdf8;
+        }
+
+        .map-anim-surge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(8, 51, 68, 0.95);
+            border: 2px solid var(--cyan);
+            box-shadow: 0 0 16px var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: iconWaveFloat 2s ease-in-out infinite;
+            cursor: pointer;
+        }
+        .map-anim-surge svg {
+            width: 16px;
+            height: 16px;
+            color: var(--cyan);
+        }
+
+        .map-anim-trackpoint {
+            width: 14px;
+            height: 14px;
+            background: rgba(239, 68, 68, 0.9);
+            border: 2px solid #ffffff;
+            border-radius: 3px;
+            transform: rotate(45deg);
+            box-shadow: 0 0 10px #ef4444;
+            animation: iconPulseGlow 2s infinite;
+            cursor: pointer;
+        }
+
+        /* Animated Flow along Power Lines & Track */
+        path.leaflet-interactive.energy-flow-path {
+            stroke-dasharray: 8, 6;
+            animation: energyFlow 1.2s linear infinite;
+        }
+        path.leaflet-interactive.cyclone-track-path {
+            stroke-dasharray: 10, 6;
+            animation: energyFlow 1.8s linear infinite;
+        }
+
         /* Entrance Keyframes */
         @keyframes ent-reveal { from { transform: translateY(115%); } to { transform: translateY(0); } }
         @keyframes ent-rise { from { opacity: 0; transform: translateY(var(--rise, 10px)); } to { opacity: 1; transform: none; } }
@@ -619,7 +796,7 @@
         <div class="navrow" id="mainNavRow" data-open="false">
             <a class="logo" href="#" onclick="switchPage('hero'); return false;">
                 <span class="icon-box anim-cyclone" style="margin-right:8px;"><i data-lucide="disc-3" style="width:20px; height:20px;"></i></span>
-                <span>aegis<i>cyclone</i></span>
+                <span>weather<i>call</i></span>
                 <span class="logo-badge">SLOSH & CEA RAG</span>
             </a>
             <nav class="links" id="site-nav">
@@ -828,7 +1005,8 @@
                     <select id="baseMapSelect" onchange="switchBaseMap(this.value)" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:var(--cyan); border:1px solid rgba(121,220,232,0.4); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; outline:none; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
                         <option value="geoapify">Geoapify Dark Matter GIS (Active API)</option>
                         <option value="carto">CARTO Dark Matter Standard</option>
-                        <option value="nasa">NASA GIBS VIIRS Satellite (NASA Key)</option>
+                        <option value="nasa">NASA GIBS VIIRS SNPP Satellite</option>
+                        <option value="nasamodis">NASA GIBS MODIS Terra Satellite</option>
                         <option value="satellite">ESRI High-Res World Imagery</option>
                         <option value="osm">OpenStreetMap Standard</option>
                     </select>
@@ -1139,6 +1317,8 @@
         let layerGroups = {
             baseGeoapify: null,
             baseCarto: null,
+            baseNasaViirs: null,
+            baseNasaModis: null,
             baseNasa: null,
             baseSat: null,
             baseOsm: null,
@@ -1247,12 +1427,37 @@
                 attributionControl: false
             });
 
-            // Base Layers using user-provided API Keys
-            layerGroups.baseGeoapify = L.tileLayer(`https://maps.geoapify.com/v1/tile/dark-matter-purple-roads/{z}/{x}/{y}.png?apiKey=${MAP_API_KEY}`, { maxZoom: 19, attribution: '© Geoapify © OpenStreetMap' });
-            layerGroups.baseCarto = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '© CARTO' });
-            layerGroups.baseNasa = L.tileLayer(`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg?api_key=${NASA_API_KEY}`, { maxZoom: 9, attribution: '© NASA Earthdata / GIBS' });
-            layerGroups.baseSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: '© Esri, Earthstar Geographics' });
-            layerGroups.baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' });
+            // Base Layers using user-provided API Keys and NASA GIBS WMTS
+            layerGroups.baseGeoapify = L.tileLayer(`https://maps.geoapify.com/v1/tile/dark-matter-purple-roads/{z}/{x}/{y}.png?apiKey=${MAP_API_KEY}`, {
+                maxZoom: 19,
+                attribution: '© Geoapify © OpenStreetMap'
+            });
+            layerGroups.baseCarto = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '© CARTO'
+            });
+            // NASA GIBS WMTS EPSG:3857 Corrected Reflectance True Color Tiles (upscaled cleanly with maxNativeZoom: 8)
+            layerGroups.baseNasaViirs = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg', {
+                maxNativeZoom: 8,
+                maxZoom: 19,
+                tileSize: 256,
+                attribution: '© NASA Earthdata / GIBS / EOSDIS'
+            });
+            layerGroups.baseNasaModis = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg', {
+                maxNativeZoom: 8,
+                maxZoom: 19,
+                tileSize: 256,
+                attribution: '© NASA Earthdata / GIBS / EOSDIS'
+            });
+            layerGroups.baseNasa = layerGroups.baseNasaViirs;
+            layerGroups.baseSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 18,
+                attribution: '© Esri, Earthstar Geographics'
+            });
+            layerGroups.baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            });
 
             // Set default active base map (Geoapify Dark Matter GIS)
             layerGroups.baseGeoapify.addTo(map);
@@ -1270,18 +1475,27 @@
             });
 
             renderMapLayers();
-            fetchLiveStationWeather(20.812, 86.974, 'Dhamra Coastal Radar');
+            fetchLiveStationWeather(20.812, 86.974, 'Dhamra Coastal Doppler Radar');
         }
 
         function switchBaseMap(type) {
             if (!map) return;
-            [layerGroups.baseGeoapify, layerGroups.baseCarto, layerGroups.baseNasa, layerGroups.baseSat, layerGroups.baseOsm].forEach(l => {
+            [
+                layerGroups.baseGeoapify,
+                layerGroups.baseCarto,
+                layerGroups.baseNasaViirs,
+                layerGroups.baseNasaModis,
+                layerGroups.baseNasa,
+                layerGroups.baseSat,
+                layerGroups.baseOsm
+            ].forEach(l => {
                 if (l && map.hasLayer(l)) map.removeLayer(l);
             });
 
             if (type === 'geoapify') layerGroups.baseGeoapify.addTo(map);
             else if (type === 'carto') layerGroups.baseCarto.addTo(map);
-            else if (type === 'nasa') layerGroups.baseNasa.addTo(map);
+            else if (type === 'nasa_viirs' || type === 'nasa') layerGroups.baseNasaViirs.addTo(map);
+            else if (type === 'nasa_modis') layerGroups.baseNasaModis.addTo(map);
             else if (type === 'satellite') layerGroups.baseSat.addTo(map);
             else if (type === 'osm') layerGroups.baseOsm.addTo(map);
             else layerGroups.baseGeoapify.addTo(map);
@@ -1330,11 +1544,11 @@
             }
         }
 
-        // Render Comprehensive GIS Layers
+        // Render Comprehensive GIS Layers with Animated Vector Icons & Flow Lines
         function renderMapLayers() {
             const backendUrl = getBackendUrl();
 
-            // 1. Storm Surge Inundation Polygon (SLOSH model)
+            // 1. Storm Surge Inundation Polygon (SLOSH model) + Animated Peak Crest Marker
             layerGroups.surge.clearLayers();
             const surgePoly = L.polygon([
                 [20.45, 86.60], [20.70, 86.90], [21.10, 87.20], [21.30, 87.50],
@@ -1347,41 +1561,55 @@
             }).bindPopup('<b>Storm Surge Inundation Zone (SLOSH Model)</b><br>Peak Surge: 3.85m MSL<br>Inundation Extent: 4.2 km Inland');
             layerGroups.surge.addLayer(surgePoly);
 
-            // 2. India Power Grid 765kV / 400kV / 220kV / 132kV from Overpass Turbo dataset
+            // Animated Surge Apex Wave Marker
+            const surgePeakIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `
+                    <div class="map-anim-surge" title="SLOSH Peak Hydrodynamic Surge Apex">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+                            <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+                            <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+                        </svg>
+                    </div>
+                `,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+            const surgePeakMarker = L.marker([20.81, 86.97], { icon: surgePeakIcon })
+                .bindPopup('<b>SLOSH Peak Inundation Apex</b><br>Surge Height: 3.85m MSL<br>Inland Reach: 4.2 km<br>Hydrodynamic Force: 3.4 m/s');
+            layerGroups.surge.addLayer(surgePeakMarker);
+
+            // 2. India Power Grid 765kV / 400kV / 220kV / 132kV (Overpass Turbo dataset) with Animated Flow & Electric Substations
             layerGroups.grid.clearLayers();
             fetch(`${backendUrl}/api/power-grid/india-network`)
                 .then(r => r.ok ? r.json() : null)
                 .then(dataset => {
                     if (!dataset || !dataset.transmission_lines) {
-                        // Fallback static lines if backend unavailable
+                        // Fallback static lines with energy flow animation
                         const gridLines = [
                             [[20.81, 86.97], [20.29, 85.82]],
                             [[20.81, 86.97], [21.49, 86.93]],
                             [[21.49, 86.93], [22.57, 88.36]]
                         ];
                         gridLines.forEach(line => {
-                            const pl = L.polyline(line, { color: '#eab308', weight: 3, dashArray: '6, 6' })
-                                .bindPopup('<b>CEA National Grid 400kV Interconnect</b><br>Operating Status: Islanding Alert (CEA-SOP-502)');
+                            const pl = L.polyline(line, {
+                                className: 'energy-flow-path',
+                                color: '#79dce8',
+                                weight: 3.5,
+                                opacity: 0.95
+                            }).bindPopup('<b>CEA National Grid 400kV Interconnect</b><br>Operating Status: Islanding Alert (CEA-SOP-502)');
                             layerGroups.grid.addLayer(pl);
                         });
                         return;
                     }
 
-                    // Render transmission lines with voltage-based coloring
-                    const voltageColors = {
-                        '765': '#f59e0b',
-                        '400': '#f59e0b',
-                        '220': '#eab308',
-                        '132': '#d4a373',
-                        'default': '#eab308'
-                    };
-
+                    // Render transmission lines with energy flow animation
                     dataset.transmission_lines.forEach(line => {
                         let coords = null;
                         let name = 'CEA Transmission Line';
                         let voltage = '400kV';
 
-                        // Handle different dataset shapes (GeoJSON-like or array of coords)
                         if (line.geometry && line.geometry.coordinates) {
                             coords = line.geometry.coordinates.map(c => [c[1], c[0]]);
                             name = line.properties ? line.properties.name || name : name;
@@ -1391,7 +1619,6 @@
                             name = line.name || name;
                             voltage = line.voltage || voltage;
                         } else if (Array.isArray(line)) {
-                            // Already in [lat, lon] format
                             coords = line;
                         } else if (line.start && line.end) {
                             coords = [line.start, line.end];
@@ -1401,80 +1628,110 @@
 
                         if (!coords || coords.length === 0) return;
 
-                        const colorKey = Object.keys(voltageColors).find(k => k === String(voltage).replace('kV','') || String(voltage).includes(k));
-                        const color = voltageColors[colorKey] || voltageColors['default'];
-
                         const pl = L.polyline(coords, {
-                            color: color,
-                            weight: voltage.includes('765') ? 4 : 3,
-                            dashArray: voltage.includes('765') ? '8, 4' : '6, 6',
-                            opacity: 0.9
-                        }).bindPopup(`<b>${name}</b><br>Voltage: ${voltage}<br><b>CEA Grid Status</b><br>Operating Mode: ${voltage.includes('400') ? 'Islanding Alert (CEA-SOP-502)' : 'Active Monitoring'}`);
+                            className: 'energy-flow-path',
+                            color: '#79dce8',
+                            weight: String(voltage).includes('765') ? 4.5 : 3.5,
+                            opacity: 0.95
+                        }).bindPopup(`<b>${name}</b><br>Voltage: ${voltage}<br><b>CEA Grid Status</b><br>Operating Mode: ${String(voltage).includes('400') ? 'Islanding Alert (CEA-SOP-502)' : 'Active Monitoring'}`);
                         layerGroups.grid.addLayer(pl);
                     });
 
-                    // Render substations
+                    // Render animated substation vector markers
                     dataset.substations.forEach(sub => {
                         const lat = sub.lat || (sub.geometry && sub.geometry.coordinates ? sub.geometry.coordinates[1] : null);
                         const lon = sub.lon || (sub.geometry && sub.geometry.coordinates ? sub.geometry.coordinates[0] : null);
                         if (!lat || !lon) return;
 
-                        const voltageColors = {
-                            '765': '#f59e0b',
-                            '400': '#f59e0b',
-                            '220': '#eab308',
-                            '132': '#d4a373'
-                        };
-                        const voltageKey = String(sub.voltage || '').replace('kV','');
-                        const color = voltageColors[voltageKey] || '#eab308';
-                        const radius = voltageKey === '765' ? 10 : voltageKey === '400' ? 8 : 7;
+                        const subIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `
+                                <div class="map-anim-substation" title="${sub.name || 'Power Substation'}">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(121, 220, 232, 0.4)"></polygon>
+                                    </svg>
+                                </div>
+                            `,
+                            iconSize: [26, 26],
+                            iconAnchor: [13, 13]
+                        });
 
-                        const marker = L.circleMarker([lat, lon], {
-                            radius: radius,
-                            color: color,
-                            fillColor: color,
-                            fillOpacity: 0.95,
-                            weight: 1.5
-                        }).bindPopup(`<b>${sub.name || sub.id || 'Substation'}</b><br>${sub.voltage || 'Unknown kV'}<br>Vulnerability: ${sub.status || 'N/A'}`);
+                        const marker = L.marker([lat, lon], { icon: subIcon })
+                            .bindPopup(`<b>${sub.name || sub.id || 'Substation'}</b><br>Rating: ${sub.voltage || 'Grid Interconnect'}<br>Vulnerability: ${sub.status || 'Active CEA Node'}`);
                         layerGroups.grid.addLayer(marker);
                     });
                 }).catch(() => {
-                    // Network error — fallback static substation markers
+                    // Network fallback static substation markers
                     const substations = [
-                        { name: 'Dhamra 220kV Substation', lat: 20.81, lon: 86.97, status: 'Severe Risk' },
-                        { name: 'Bhubaneswar 400kV Grid Station', lat: 20.29, lon: 85.82, status: 'Operational' },
-                        { name: 'Balasore 220kV Substation', lat: 21.49, lon: 86.93, status: 'Moderate Risk' }
+                        { name: 'Dhamra 220kV Substation', lat: 20.81, lon: 86.97, status: 'Severe Risk', voltage: '220kV' },
+                        { name: 'Bhubaneswar 400kV Grid Station', lat: 20.29, lon: 85.82, status: 'Operational', voltage: '400kV' },
+                        { name: 'Balasore 220kV Substation', lat: 21.49, lon: 86.93, status: 'Moderate Risk', voltage: '220kV' }
                     ];
                     substations.forEach(sub => {
-                        const marker = L.circleMarker([sub.lat, sub.lon], {
-                            radius: 7,
-                            color: '#eab308',
-                            fillColor: '#eab308',
-                            fillOpacity: 0.9
-                        }).bindPopup(`<b>${sub.name}</b><br>Vulnerability: ${sub.status}`);
+                        const subIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `
+                                <div class="map-anim-substation" title="${sub.name}">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(121, 220, 232, 0.4)"></polygon>
+                                    </svg>
+                                </div>
+                            `,
+                            iconSize: [26, 26],
+                            iconAnchor: [13, 13]
+                        });
+                        const marker = L.marker([sub.lat, sub.lon], { icon: subIcon })
+                            .bindPopup(`<b>${sub.name}</b><br>Rating: ${sub.voltage}<br>Vulnerability: ${sub.status}`);
                         layerGroups.grid.addLayer(marker);
                     });
                 });
 
-            // 3. Cyclone Track & Eye Marker
+            // 3. Cyclone Track Path & Vortex Landfall Eye Marker
             layerGroups.track.clearLayers();
             const trackCoords = [
                 [18.5, 87.2], [19.2, 87.1], [20.1, 87.0], [20.81, 86.97], [21.5, 86.9], [22.2, 86.8]
             ];
-            const trackLine = L.polyline(trackCoords, { color: '#ef4444', weight: 3 }).addTo(layerGroups.track);
+            const trackLine = L.polyline(trackCoords, {
+                className: 'cyclone-track-path',
+                color: '#79dce8',
+                weight: 3.5,
+                opacity: 0.95
+            }).addTo(layerGroups.track);
 
-            // Cyclone Eye Pulsing Marker
+            // Add Milestone diamond points along track
+            trackCoords.forEach((pt, idx) => {
+                if (idx === 3) return; // Skip center eye (rendered as vortex)
+                const pointIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div class="map-anim-trackpoint" title="Track Milestone T-' + (idx < 3 ? (3 - idx)*6 + 'h' : '+' + (idx - 3)*6 + 'h') + '"></div>',
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+                const ptMarker = L.marker(pt, { icon: pointIcon })
+                    .bindPopup(`<b>Track Milestone T${idx < 3 ? '-' + (3 - idx)*6 : '+' + (idx - 3)*6}h</b><br>Estimated Location: [${pt[0]}, ${pt[1]}]`);
+                layerGroups.track.addLayer(ptMarker);
+            });
+
+            // Cyclone Eye Landfall Vortex Marker
             const eyeIcon = L.divIcon({
-                className: 'custom-eye-icon',
-                html: '<div style="width:24px; height:24px; border-radius:50%; background:#ef4444; border:3px solid #fff; box-shadow:0 0 16px #ef4444;" class="pulse-marker"></div>',
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                className: 'custom-div-icon',
+                html: `
+                    <div class="map-anim-eye" title="Cyclone Eye Landfall Vortex">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3.5" fill="rgba(121, 220, 232, 0.6)"></circle>
+                            <path d="M12 2C6.5 2 2 6.5 2 12c0 2.2.7 4.2 1.9 5.9A10 10 0 0 0 12 22c5.5 0 10-4.5 10-10 0-2.2-.7-4.2-1.9-5.9A10 10 0 0 0 12 2z"></path>
+                            <path d="M12 8a4 4 0 1 0 4 4"></path>
+                        </svg>
+                    </div>
+                `,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
             });
             const eyeMarker = L.marker([20.81, 86.97], { icon: eyeIcon })
-                .bindPopup('<b>Cyclone Eye Landfall Position (T-0)</b><br>Max Sustained Wind: 125 km/h<br>Central Pressure: 980 hPa');
+                .bindPopup('<b>Cyclone Eye Landfall Vortex (T-0)</b><br>Max Sustained Wind: 125 km/h<br>Central Pressure: 980 hPa<br>Vortex Radius: 18 km');
             layerGroups.track.addLayer(eyeMarker);
 
-            // 4. NDMA Shelters
+            // 4. NDMA Cyclone Shelters with Animated Shield Vector Icons
             layerGroups.shelters.clearLayers();
             const shelters = [
                 { name: 'Dhamra Cyclone Shelter #1', lat: 20.83, lon: 86.92, cap: '1,500 people' },
@@ -1482,16 +1739,24 @@
                 { name: 'Bhadrak District Shelter #4', lat: 21.05, lon: 86.50, cap: '3,000 people' }
             ];
             shelters.forEach(s => {
-                const marker = L.circleMarker([s.lat, s.lon], {
-                    radius: 6,
-                    color: '#10b981',
-                    fillColor: '#10b981',
-                    fillOpacity: 0.9
-                }).bindPopup(`<b>${s.name}</b><br>Capacity: ${s.cap}`);
+                const shelterIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `
+                        <div class="map-anim-shelter" title="${s.name}">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(121, 220, 232, 0.3)"></path>
+                            </svg>
+                        </div>
+                    `,
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 13]
+                });
+                const marker = L.marker([s.lat, s.lon], { icon: shelterIcon })
+                    .bindPopup(`<b>${s.name}</b><br>Capacity: ${s.cap}<br>Status: Ready & Stocked`);
                 layerGroups.shelters.addLayer(marker);
             });
 
-            // 5. Live Flight Radar (AviationStack API)
+            // 5. Live Flight Radar (AviationStack API) with Animated Aircraft Icons
             layerGroups.flights.clearLayers();
             fetch(`${backendUrl}/api/live-flights`)
                 .then(r => r.ok ? r.json() : null)
@@ -1501,10 +1766,16 @@
                         if (f.status === 'GROUND' || f.status === 0) return;
 
                         const flightIcon = L.divIcon({
-                            className: 'flight-icon',
-                            html: `<div style="width:14px; height:14px; background:${f.alert.includes('Reroute') ? '#3b82f6' : '#10b981'}; border-radius:50%; border:2px solid #fff; box-shadow:0 0 8px #fff;"></div>`,
-                            iconSize: [14, 14],
-                            iconAnchor: [7, 7]
+                            className: 'custom-div-icon',
+                            html: `
+                                <div class="map-anim-radar" style="width:24px; height:24px;" title="${f.callsign || f.flight_iata}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" fill="rgba(121, 220, 232, 0.4)"></path>
+                                    </svg>
+                                </div>
+                            `,
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
                         });
                         const marker = L.marker([f.lat, f.lon], { icon: flightIcon })
                             .bindPopup(`<b>${f.callsign || f.flight_iata}</b><br>${f.airline} • ${f.aircraft}<br>Status: ${f.status}<br>Speed: ${f.speed_kts} kts<br>Alert: ${f.alert}`);
@@ -1512,28 +1783,26 @@
                     });
                 }).catch(() => {});
 
-            // 6. Bathymetry Transects (from backend infrastructure engine)
+            // 6. Bathymetry Transects (SLOSH Cross-Section Profiles)
             layerGroups.transects.clearLayers();
             fetch(`${backendUrl}/api/infrastructure`)
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     if (!data || !data.coastal_transect) return;
-                    // If transect has geo points, render as polyline
                     const coords = data.coastal_transect.geo_points || data.coastal_transect.points;
                     if (coords && coords.length > 1) {
-                        L.polyline(coords, { color: '#79dce8', weight: 2, opacity: 0.6, dashArray: '4,4' })
-                            .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Cross-Section Depth')
+                        L.polyline(coords, { color: '#79dce8', weight: 2.5, opacity: 0.8, dashArray: '6, 6' })
+                            .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Hydrodynamic Cross-Section Depth')
                             .addTo(layerGroups.transects);
                     }
                 }).catch(() => {
-                    // Fallback static transect line
                     const transectCoords = [[20.45, 86.6], [20.8, 86.95], [20.5, 87.3]];
-                    L.polyline(transectCoords, { color: '#79dce8', weight: 2, opacity: 0.6, dashArray: '4,4' })
-                        .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Cross-Section Depth')
+                    L.polyline(transectCoords, { color: '#79dce8', weight: 2.5, opacity: 0.8, dashArray: '6, 6' })
+                        .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Hydrodynamic Cross-Section Depth')
                         .addTo(layerGroups.transects);
                 });
 
-            // 7. Coastal Weather Stations (Live Open-Meteo Synoptic Stations)
+            // 7. Coastal Weather Stations & Light Radars with Animated Rotating Radar Sweep
             layerGroups.stations.clearLayers();
             const weatherStations = [
                 { name: 'Dhamra Coastal Doppler Radar', lat: 20.812, lon: 86.974, type: 'Doppler Radar' },
@@ -1544,14 +1813,25 @@
                 { name: 'Sagar Island Met Observatory', lat: 21.651, lon: 88.077, type: 'Island Radar' }
             ];
             weatherStations.forEach(st => {
-                const stationIcon = L.divIcon({
-                    className: 'station-marker',
-                    html: '<div style="width:12px; height:12px; background:#10b981; border-radius:50%; border:2px solid #fff; box-shadow:0 0 10px #10b981;"></div>',
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
+                const radarIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `
+                        <div class="map-anim-radar" title="${st.name}">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"></path>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="var(--cyan)"></path>
+                                <line x1="12" y1="2" x2="12" y2="6"></line>
+                                <line x1="12" y1="18" x2="12" y2="22"></line>
+                                <line x1="2" y1="12" x2="6" y2="12"></line>
+                                <line x1="18" y1="12" x2="22" y2="12"></line>
+                            </svg>
+                        </div>
+                    `,
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
                 });
-                const marker = L.marker([st.lat, st.lon], { icon: stationIcon })
-                    .bindPopup(`<b>${st.name}</b><br>Type: ${st.type}<br><button onclick="fetchLiveStationWeather(${st.lat}, ${st.lon}, '${st.name}')" style="margin-top:6px; background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Sync Live Telemetry</button>`);
+                const marker = L.marker([st.lat, st.lon], { icon: radarIcon })
+                    .bindPopup(`<b>${st.name}</b><br>Type: ${st.type}<br><button onclick="fetchLiveStationWeather(${st.lat}, ${st.lon}, '${st.name}')" style="margin-top:6px; background:var(--cyan); color:#09152a; font-weight:700; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Sync Live Telemetry</button>`);
                 marker.on('click', () => fetchLiveStationWeather(st.lat, st.lon, st.name));
                 layerGroups.stations.addLayer(marker);
             });

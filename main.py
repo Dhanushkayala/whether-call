@@ -13,12 +13,12 @@ if backend_dir not in sys.path:
 
 # Load backend main.py explicitly to avoid circular 'main' import conflict
 backend_main_file = os.path.join(backend_dir, "main.py")
-spec = importlib.util.spec_from_file_location("aegis_backend_main", backend_main_file)
-aegis_backend_main = importlib.util.module_from_spec(spec)
-sys.modules["aegis_backend_main"] = aegis_backend_main
-spec.loader.exec_module(aegis_backend_main)
+spec = importlib.util.spec_from_file_location("weathercall_backend_main", backend_main_file)
+weathercall_backend_main = importlib.util.module_from_spec(spec)
+sys.modules["weathercall_backend_main"] = weathercall_backend_main
+spec.loader.exec_module(weathercall_backend_main)
 
-app = aegis_backend_main.app
+app = weathercall_backend_main.app
 
 if __name__ == "__main__":
     import uvicorn
