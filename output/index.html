@@ -784,7 +784,7 @@
             <div class="space-y-3 text-xs">
                 <div>
                     <label class="text-gray-300 font-semibold block mb-1">Backend Server Endpoint (Render / Localhost)</label>
-                    <input id="modalBackendUrlInput" type="text" placeholder="e.g., https://whether-call-backend.onrender.com or http://127.0.0.1:8000" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-emerald-300" value="">
+                    <input id="modalBackendUrlInput" type="text" placeholder="https://whether-call.onrender.com" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-emerald-300" value="https://whether-call.onrender.com">
                 </div>
                 <div>
                     <label class="text-gray-300 font-semibold block mb-1">Google Gemini & GEE API Key</label>
@@ -1782,12 +1782,16 @@ out skel qt;</textarea>
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 return 'http://127.0.0.1:8000';
             }
-            return '';
+            if (window.location.hostname.includes('onrender.com')) {
+                return window.location.origin;
+            }
+            // Default to live Render backend for Vercel / external deployments
+            return 'https://whether-call.onrender.com';
         }
 
         function openApiModal() {
             const backendInput = document.getElementById('modalBackendUrlInput');
-            if (backendInput) backendInput.value = localStorage.getItem('AEGIS_BACKEND_URL') || (window.location.hostname === 'localhost' ? 'http://127.0.0.1:8000' : '');
+            if (backendInput) backendInput.value = localStorage.getItem('AEGIS_BACKEND_URL') || getBackendUrl();
             document.getElementById('apiModal')?.classList.remove('hidden');
         }
         function closeApiModal() { document.getElementById('apiModal')?.classList.add('hidden'); }
