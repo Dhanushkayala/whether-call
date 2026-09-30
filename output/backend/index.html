@@ -447,7 +447,7 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Custom Animated GIS Vector Markers */
+        /* Custom Animated GIS Vector Markers - Authentic Domain Colors */
         @keyframes radarSweep {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -458,34 +458,39 @@
             100% { transform: rotate(360deg) scale(1); }
         }
         @keyframes iconElectricSpark {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px var(--cyan)) drop-shadow(0 0 8px rgba(121,220,232,0.8)); }
-            50% { transform: scale(1.15) rotate(4deg); filter: drop-shadow(0 0 8px #f59e0b) drop-shadow(0 0 16px rgba(245,158,11,0.9)); }
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(245,158,11,0.8)) drop-shadow(0 0 10px rgba(245,158,11,0.6)); }
+            50% { transform: scale(1.15) rotate(4deg); filter: drop-shadow(0 0 8px #f59e0b) drop-shadow(0 0 18px rgba(251,191,36,0.9)); }
         }
         @keyframes iconPulseGlow {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(121, 220, 232, 0.85); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(121, 220, 232, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(121, 220, 232, 0); }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.85); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        @keyframes iconTrackGlow {
+            0% { transform: rotate(45deg) scale(0.92); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.85); }
+            70% { transform: rotate(45deg) scale(1.12); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: rotate(45deg) scale(0.92); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
         @keyframes iconWaveFloat {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-4px) scale(1.06); }
+            0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 6px rgba(56,189,248,0.7)); }
+            50% { transform: translateY(-4px) scale(1.08); filter: drop-shadow(0 0 14px rgba(56,189,248,0.95)); }
         }
         @keyframes energyFlow {
             0% { stroke-dashoffset: 48; }
             100% { stroke-dashoffset: 0; }
         }
         @keyframes flightGlow {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px var(--cyan)); }
-            50% { transform: scale(1.14); filter: drop-shadow(0 0 10px #38bdf8); }
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(245,158,11,0.7)); }
+            50% { transform: scale(1.14); filter: drop-shadow(0 0 12px #fbbf24); }
         }
 
         .map-anim-eye {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(239, 68, 68, 0.9) 0%, rgba(15, 23, 42, 0.95) 70%);
-            border: 2px solid var(--cyan);
-            box-shadow: 0 0 20px var(--cyan), 0 0 35px rgba(239, 68, 68, 0.8);
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.95) 0%, rgba(30, 10, 10, 0.95) 70%);
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 20px #ef4444, 0 0 35px rgba(239, 68, 68, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -502,9 +507,9 @@
             width: 26px;
             height: 26px;
             border-radius: 7px;
-            background: rgba(9, 21, 42, 0.92);
-            border: 1.5px solid var(--cyan);
-            box-shadow: 0 0 12px rgba(121, 220, 232, 0.8);
+            background: rgba(30, 20, 5, 0.92);
+            border: 1.5px solid #f59e0b;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.7);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -514,16 +519,16 @@
         .map-anim-substation svg {
             width: 14px;
             height: 14px;
-            color: var(--cyan);
+            color: #fbbf24;
         }
 
         .map-anim-shelter {
             width: 26px;
             height: 26px;
             border-radius: 50%;
-            background: rgba(6, 78, 59, 0.9);
-            border: 1.5px solid var(--cyan);
-            box-shadow: 0 0 12px var(--cyan);
+            background: rgba(6, 78, 59, 0.92);
+            border: 1.5px solid #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -541,9 +546,9 @@
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            background: rgba(9, 21, 42, 0.92);
-            border: 1.5px solid var(--cyan);
-            box-shadow: 0 0 12px var(--cyan);
+            background: rgba(6, 40, 30, 0.92);
+            border: 1.5px solid #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -554,23 +559,23 @@
             position: absolute;
             inset: -5px;
             border-radius: 50%;
-            border: 1.5px dashed var(--cyan);
-            opacity: 0.7;
+            border: 1.5px dashed #10b981;
+            opacity: 0.75;
             animation: radarSweep 3s linear infinite;
         }
         .map-anim-radar svg {
             width: 15px;
             height: 15px;
-            color: var(--cyan);
+            color: #10b981;
         }
 
         .map-anim-flight {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: rgba(9, 21, 42, 0.95);
-            border: 1.5px solid #38bdf8;
-            box-shadow: 0 0 10px #38bdf8;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1.5px solid #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -580,16 +585,16 @@
         .map-anim-flight svg {
             width: 13px;
             height: 13px;
-            color: #38bdf8;
+            color: #fbbf24;
         }
 
         .map-anim-surge {
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            background: rgba(8, 51, 68, 0.95);
-            border: 2px solid var(--cyan);
-            box-shadow: 0 0 16px var(--cyan);
+            background: rgba(7, 43, 77, 0.95);
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.75);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -599,18 +604,18 @@
         .map-anim-surge svg {
             width: 16px;
             height: 16px;
-            color: var(--cyan);
+            color: #38bdf8;
         }
 
         .map-anim-trackpoint {
             width: 14px;
             height: 14px;
-            background: rgba(239, 68, 68, 0.9);
+            background: rgba(239, 68, 68, 0.95);
             border: 2px solid #ffffff;
             border-radius: 3px;
             transform: rotate(45deg);
             box-shadow: 0 0 10px #ef4444;
-            animation: iconPulseGlow 2s infinite;
+            animation: iconTrackGlow 2s infinite;
             cursor: pointer;
         }
 
@@ -968,23 +973,23 @@
                         </span>
 
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                            <button id="togSurge" onclick="toggleLayer('surge')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(6,182,212,0.15); border:1px solid rgba(121,220,232,0.4); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <span class="icon-box anim-wave"><i data-lucide="waves" style="width:14px; height:14px; color:var(--cyan);"></i></span> Storm Surge
+                            <button id="togSurge" onclick="toggleLayer('surge')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(2,132,199,0.18); border:1px solid rgba(56,189,248,0.5); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
+                                <span class="icon-box anim-wave"><i data-lucide="waves" style="width:14px; height:14px; color:#38bdf8;"></i></span> Storm Surge
                             </button>
-                            <button id="togGrid" onclick="toggleLayer('grid')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(6,182,212,0.15); border:1px solid rgba(121,220,232,0.4); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <span class="icon-box anim-electric"><i data-lucide="zap" style="width:14px; height:14px; color:var(--cyan);"></i></span> CEA Power Grid
+                            <button id="togGrid" onclick="toggleLayer('grid')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(245,158,11,0.18); border:1px solid rgba(251,191,36,0.5); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
+                                <span class="icon-box anim-electric"><i data-lucide="zap" style="width:14px; height:14px; color:#fbbf24;"></i></span> CEA Power Grid
                             </button>
-                            <button id="togTransects" onclick="toggleLayer('transects')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(6,182,212,0.15); border:1px solid rgba(121,220,232,0.4); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <span class="icon-box anim-pulse"><i data-lucide="bar-chart-2" style="width:14px; height:14px; color:var(--cyan);"></i></span> Bathymetry
+                            <button id="togTransects" onclick="toggleLayer('transects')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(14,165,233,0.18); border:1px solid rgba(56,189,248,0.5); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
+                                <span class="icon-box anim-pulse"><i data-lucide="bar-chart-2" style="width:14px; height:14px; color:#0ea5e9;"></i></span> Bathymetry
                             </button>
-                            <button id="togShelters" onclick="toggleLayer('shelters')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(6,182,212,0.15); border:1px solid rgba(121,220,232,0.4); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <span class="icon-box anim-bounce"><i data-lucide="home" style="width:14px; height:14px; color:var(--cyan);"></i></span> NDMA Shelters
+                            <button id="togShelters" onclick="toggleLayer('shelters')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(16,185,129,0.18); border:1px solid rgba(52,211,153,0.5); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
+                                <span class="icon-box anim-bounce"><i data-lucide="home" style="width:14px; height:14px; color:#34d399;"></i></span> NDMA Shelters
                             </button>
-                            <button id="togFlights" onclick="toggleLayer('flights')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(6,182,212,0.15); border:1px solid rgba(121,220,232,0.4); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <span class="icon-box anim-bounce"><i data-lucide="plane" style="width:14px; height:14px; color:var(--cyan);"></i></span> Flight Radar
+                            <button id="togFlights" onclick="toggleLayer('flights')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(245,158,11,0.18); border:1px solid rgba(251,191,36,0.5); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
+                                <span class="icon-box anim-bounce"><i data-lucide="plane" style="width:14px; height:14px; color:#fbbf24;"></i></span> Flight Radar
                             </button>
-                            <button id="togTrack" onclick="toggleLayer('track')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(6,182,212,0.15); border:1px solid rgba(121,220,232,0.4); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
-                                <span class="icon-box anim-cyclone"><i data-lucide="target" style="width:14px; height:14px; color:var(--cyan);"></i></span> Cyclone Eye
+                            <button id="togTrack" onclick="toggleLayer('track')" style="padding:8px; border-radius:8px; font-size:11px; font-weight:600; background:rgba(239,68,68,0.18); border:1px solid rgba(248,113,113,0.5); color:#fff; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px;">
+                                <span class="icon-box anim-cyclone"><i data-lucide="target" style="width:14px; height:14px; color:#ef4444;"></i></span> Cyclone Eye
                             </button>
                         </div>
                     </div>
@@ -1544,6 +1549,17 @@
             }
         }
 
+        // Helper to get authentic CEA voltage colors
+        function getGridLineColor(voltage) {
+            const v = String(voltage || '');
+            if (v.includes('765')) return '#ef4444';
+            if (v.includes('400')) return '#f97316';
+            if (v.includes('220')) return '#eab308';
+            if (v.includes('132')) return '#22c55e';
+            if (v.includes('800') || v.includes('HVDC')) return '#a855f7';
+            return '#f59e0b';
+        }
+
         // Render Comprehensive GIS Layers with Animated Vector Icons & Flow Lines
         function renderMapLayers() {
             const backendUrl = getBackendUrl();
@@ -1554,8 +1570,8 @@
                 [20.45, 86.60], [20.70, 86.90], [21.10, 87.20], [21.30, 87.50],
                 [21.15, 87.65], [20.80, 87.35], [20.50, 87.05], [20.35, 86.75]
             ], {
-                color: '#79dce8',
-                fillColor: '#06b6d4',
+                color: '#38bdf8',
+                fillColor: '#0284c7',
                 fillOpacity: 0.45,
                 weight: 2
             }).bindPopup('<b>Storm Surge Inundation Zone (SLOSH Model)</b><br>Peak Surge: 3.85m MSL<br>Inundation Extent: 4.2 km Inland');
@@ -1566,7 +1582,7 @@
                 className: 'custom-div-icon',
                 html: `
                     <div class="map-anim-surge" title="SLOSH Peak Hydrodynamic Surge Apex">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
                             <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
                             <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
@@ -1588,17 +1604,17 @@
                     if (!dataset || !dataset.transmission_lines) {
                         // Fallback static lines with energy flow animation
                         const gridLines = [
-                            [[20.81, 86.97], [20.29, 85.82]],
-                            [[20.81, 86.97], [21.49, 86.93]],
-                            [[21.49, 86.93], [22.57, 88.36]]
+                            { coords: [[20.81, 86.97], [20.29, 85.82]], voltage: '400kV' },
+                            { coords: [[20.81, 86.97], [21.49, 86.93]], voltage: '220kV' },
+                            { coords: [[21.49, 86.93], [22.57, 88.36]], voltage: '765kV' }
                         ];
                         gridLines.forEach(line => {
-                            const pl = L.polyline(line, {
+                            const pl = L.polyline(line.coords, {
                                 className: 'energy-flow-path',
-                                color: '#79dce8',
+                                color: getGridLineColor(line.voltage),
                                 weight: 3.5,
                                 opacity: 0.95
-                            }).bindPopup('<b>CEA National Grid 400kV Interconnect</b><br>Operating Status: Islanding Alert (CEA-SOP-502)');
+                            }).bindPopup(`<b>CEA National Grid ${line.voltage} Interconnect</b><br>Operating Status: Islanding Alert (CEA-SOP-502)`);
                             layerGroups.grid.addLayer(pl);
                         });
                         return;
@@ -1630,7 +1646,7 @@
 
                         const pl = L.polyline(coords, {
                             className: 'energy-flow-path',
-                            color: '#79dce8',
+                            color: getGridLineColor(voltage),
                             weight: String(voltage).includes('765') ? 4.5 : 3.5,
                             opacity: 0.95
                         }).bindPopup(`<b>${name}</b><br>Voltage: ${voltage}<br><b>CEA Grid Status</b><br>Operating Mode: ${String(voltage).includes('400') ? 'Islanding Alert (CEA-SOP-502)' : 'Active Monitoring'}`);
@@ -1647,8 +1663,8 @@
                             className: 'custom-div-icon',
                             html: `
                                 <div class="map-anim-substation" title="${sub.name || 'Power Substation'}">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(121, 220, 232, 0.4)"></polygon>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(245, 158, 11, 0.4)"></polygon>
                                     </svg>
                                 </div>
                             `,
@@ -1672,8 +1688,8 @@
                             className: 'custom-div-icon',
                             html: `
                                 <div class="map-anim-substation" title="${sub.name}">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(121, 220, 232, 0.4)"></polygon>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(245, 158, 11, 0.4)"></polygon>
                                     </svg>
                                 </div>
                             `,
@@ -1693,7 +1709,7 @@
             ];
             const trackLine = L.polyline(trackCoords, {
                 className: 'cyclone-track-path',
-                color: '#79dce8',
+                color: '#ef4444',
                 weight: 3.5,
                 opacity: 0.95
             }).addTo(layerGroups.track);
@@ -1717,8 +1733,8 @@
                 className: 'custom-div-icon',
                 html: `
                     <div class="map-anim-eye" title="Cyclone Eye Landfall Vortex">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3.5" fill="rgba(121, 220, 232, 0.6)"></circle>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3.5" fill="rgba(239, 68, 68, 0.8)"></circle>
                             <path d="M12 2C6.5 2 2 6.5 2 12c0 2.2.7 4.2 1.9 5.9A10 10 0 0 0 12 22c5.5 0 10-4.5 10-10 0-2.2-.7-4.2-1.9-5.9A10 10 0 0 0 12 2z"></path>
                             <path d="M12 8a4 4 0 1 0 4 4"></path>
                         </svg>
@@ -1743,8 +1759,8 @@
                     className: 'custom-div-icon',
                     html: `
                         <div class="map-anim-shelter" title="${s.name}">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(121, 220, 232, 0.3)"></path>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(16, 185, 129, 0.35)"></path>
                             </svg>
                         </div>
                     `,
@@ -1768,9 +1784,9 @@
                         const flightIcon = L.divIcon({
                             className: 'custom-div-icon',
                             html: `
-                                <div class="map-anim-radar" style="width:24px; height:24px;" title="${f.callsign || f.flight_iata}">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" fill="rgba(121, 220, 232, 0.4)"></path>
+                                <div class="map-anim-flight" style="width:24px; height:24px;" title="${f.callsign || f.flight_iata}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" fill="rgba(245, 158, 11, 0.4)"></path>
                                     </svg>
                                 </div>
                             `,
@@ -1791,13 +1807,13 @@
                     if (!data || !data.coastal_transect) return;
                     const coords = data.coastal_transect.geo_points || data.coastal_transect.points;
                     if (coords && coords.length > 1) {
-                        L.polyline(coords, { color: '#79dce8', weight: 2.5, opacity: 0.8, dashArray: '6, 6' })
+                        L.polyline(coords, { color: '#0ea5e9', weight: 2.5, opacity: 0.85, dashArray: '6, 6' })
                             .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Hydrodynamic Cross-Section Depth')
                             .addTo(layerGroups.transects);
                     }
                 }).catch(() => {
                     const transectCoords = [[20.45, 86.6], [20.8, 86.95], [20.5, 87.3]];
-                    L.polyline(transectCoords, { color: '#79dce8', weight: 2.5, opacity: 0.8, dashArray: '6, 6' })
+                    L.polyline(transectCoords, { color: '#0ea5e9', weight: 2.5, opacity: 0.85, dashArray: '6, 6' })
                         .bindPopup('<b>Bathymetry Transect Profile</b><br>SLOSH Hydrodynamic Cross-Section Depth')
                         .addTo(layerGroups.transects);
                 });
@@ -1817,9 +1833,9 @@
                     className: 'custom-div-icon',
                     html: `
                         <div class="map-anim-radar" title="${st.name}">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"></path>
-                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="var(--cyan)"></path>
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#10b981"></path>
                                 <line x1="12" y1="2" x2="12" y2="6"></line>
                                 <line x1="12" y1="18" x2="12" y2="22"></line>
                                 <line x1="2" y1="12" x2="6" y2="12"></line>
@@ -1831,7 +1847,7 @@
                     iconAnchor: [14, 14]
                 });
                 const marker = L.marker([st.lat, st.lon], { icon: radarIcon })
-                    .bindPopup(`<b>${st.name}</b><br>Type: ${st.type}<br><button onclick="fetchLiveStationWeather(${st.lat}, ${st.lon}, '${st.name}')" style="margin-top:6px; background:var(--cyan); color:#09152a; font-weight:700; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Sync Live Telemetry</button>`);
+                    .bindPopup(`<b>${st.name}</b><br>Type: ${st.type}<br><button onclick="fetchLiveStationWeather(${st.lat}, ${st.lon}, '${st.name}')" style="margin-top:6px; background:#10b981; color:#04101f; font-weight:700; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Sync Live Telemetry</button>`);
                 marker.on('click', () => fetchLiveStationWeather(st.lat, st.lon, st.name));
                 layerGroups.stations.addLayer(marker);
             });
