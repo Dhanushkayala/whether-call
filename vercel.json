@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "name": "whether-call",
+  "builds": [
+    {
+      "src": "output/index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "dest": "output/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "output/index.html"
+    }
+  ]
+}

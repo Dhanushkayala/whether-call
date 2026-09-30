@@ -783,6 +783,10 @@
 
             <div class="space-y-3 text-xs">
                 <div>
+                    <label class="text-gray-300 font-semibold block mb-1">Backend Server Endpoint (Render / Localhost)</label>
+                    <input id="modalBackendUrlInput" type="text" placeholder="e.g., https://whether-call-backend.onrender.com or http://127.0.0.1:8000" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-emerald-300" value="">
+                </div>
+                <div>
                     <label class="text-gray-300 font-semibold block mb-1">Google Gemini & GEE API Key</label>
                     <input id="modalGoogleKeyInput" type="password" placeholder="Enter Google Gemini / GEE API Key" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 font-mono text-cyan-300" value="">
                 </div>
@@ -1484,12 +1488,15 @@ out skel qt;</textarea>
 
             try {
                 let data = null;
-                // Attempt backend query first
-                try {
-                    const res = await fetch(`http://localhost:8000/api/weather/live?lat=${lat}&lon=${lon}`);
-                    if (res.ok) data = await res.json();
-                } catch (e) {
-                    console.log("Local server offline, querying Open-Meteo direct API:", e);
+                const bUrl = getBackendUrl();
+                // Attempt backend query first if available
+                if (bUrl) {
+                    try {
+                        const res = await fetch(`${bUrl}/api/weather/live?lat=${lat}&lon=${lon}`);
+                        if (res.ok) data = await res.json();
+                    } catch (e) {
+                        console.log("Backend server offline, falling back to Open-Meteo direct API:", e);
+                    }
                 }
 
                 // Fallback to direct public Open-Meteo REST API
@@ -1769,7 +1776,20 @@ out skel qt;</textarea>
         // =======================================================
         // 9. MODALS & INITIALIZATION
         // =======================================================
-        function openApiModal() { document.getElementById('apiModal')?.classList.remove('hidden'); }
+        function getBackendUrl() {
+            const saved = localStorage.getItem('AEGIS_BACKEND_URL');
+            if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://127.0.0.1:8000';
+            }
+            return '';
+        }
+
+        function openApiModal() {
+            const backendInput = document.getElementById('modalBackendUrlInput');
+            if (backendInput) backendInput.value = localStorage.getItem('AEGIS_BACKEND_URL') || (window.location.hostname === 'localhost' ? 'http://127.0.0.1:8000' : '');
+            document.getElementById('apiModal')?.classList.remove('hidden');
+        }
         function closeApiModal() { document.getElementById('apiModal')?.classList.add('hidden'); }
         function openOverpassModal() { document.getElementById('overpassModal')?.classList.remove('hidden'); }
         function closeOverpassModal() { document.getElementById('overpassModal')?.classList.add('hidden'); }
@@ -1782,18 +1802,20 @@ out skel qt;</textarea>
         function closeParametricModal() { document.getElementById('parametricModal')?.classList.add('hidden'); }
 
         function saveApiKeysModal() {
+            const backendUrl = document.getElementById('modalBackendUrlInput')?.value;
             const googleKey = document.getElementById('modalGoogleKeyInput')?.value;
             const nasaKey = document.getElementById('modalNasaKeyInput')?.value;
             const aviationKey = document.getElementById('modalAviationKeyInput')?.value;
             const mapKey = document.getElementById('modalMapKeyInput')?.value;
 
+            if (backendUrl !== undefined) localStorage.setItem('AEGIS_BACKEND_URL', backendUrl);
             if (googleKey) localStorage.setItem('AEGIS_GOOGLE_KEY', googleKey);
             if (nasaKey) localStorage.setItem('AEGIS_NASA_KEY', nasaKey);
             if (aviationKey) localStorage.setItem('AEGIS_AVIATION_KEY', aviationKey);
             if (mapKey) localStorage.setItem('AEGIS_MAP_API_KEY', mapKey);
 
             closeApiModal();
-            alert("All Geospatial & Meteorological API Keys Synchronized Successfully.");
+            alert("All Geospatial, Backend Endpoint & Meteorological API Keys Synchronized Successfully.");
         }
 
         function populateWmoTable() {
