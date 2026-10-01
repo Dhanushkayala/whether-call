@@ -890,10 +890,10 @@
                 <div class="glass-header" style="padding:14px 18px; display:flex; align-items:center; justify-content:space-between;">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span class="icon-box anim-spin"><i data-lucide="sliders" style="width:18px; height:18px; color:var(--cyan);"></i></span>
-                        <span style="font-weight:700; font-size:14px; letter-spacing:0.5px; text-transform:uppercase;">Control & Scenarios</span>
+                        <span style="font-weight:700; font-size:14px; letter-spacing:0.5px; text-transform:uppercase;">Live Telemetry & Control</span>
                     </div>
-                    <span id="backendIndicator" style="font-size:11px; font-family:var(--font-mono); color:var(--cyan); background:rgba(121,220,232,0.15); border:1px solid rgba(121,220,232,0.3); padding:2px 8px; border-radius:12px; display:flex; align-items:center; gap:5px;">
-                        <span class="anim-pulse" style="width:6px; height:6px; border-radius:50%; background:var(--cyan);"></span> Render Live
+                    <span id="backendIndicator" style="font-size:11px; font-family:var(--font-mono); color:#10b981; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); padding:3px 10px; border-radius:12px; display:flex; align-items:center; gap:6px; font-weight:700; letter-spacing:0.3px;">
+                        <span class="anim-pulse" style="width:7px; height:7px; border-radius:50%; background:#10b981;"></span> LIVE DATA STREAM
                     </span>
                 </div>
 
@@ -902,10 +902,16 @@
 
                     <!-- Section 1: Cyclone Scenario Selection -->
                     <div style="background:rgba(4,16,31,0.6); border:1px solid rgba(121,220,232,0.18); border-radius:12px; padding:14px;">
-                        <label style="font-size:12px; font-weight:600; color:var(--cyan); display:flex; align-items:center; gap:6px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
-                            <span class="icon-box anim-cyclone"><i data-lucide="compass" style="width:15px; height:15px; color:var(--cyan);"></i></span> Active Cyclone Scenario
-                        </label>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <label style="font-size:12px; font-weight:600; color:var(--cyan); display:flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.5px;">
+                                <span class="icon-box anim-cyclone"><i data-lucide="compass" style="width:15px; height:15px; color:var(--cyan);"></i></span> Active Tracking Stream
+                            </label>
+                            <span id="liveSyncHeartbeat" style="font-size:10px; color:#10b981; font-family:var(--font-mono); display:flex; align-items:center; gap:4px;">
+                                <span class="anim-pulse" style="width:5px; height:5px; border-radius:50%; background:#10b981;"></span> LIVE
+                            </span>
+                        </div>
                         <select id="scenarioSelect" onchange="loadScenario(this.value)" style="width:100%; background:#07152b; color:#fff; border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:8px 12px; font-size:13px; font-family:var(--font-body); outline:none; cursor:pointer;">
+                            <option value="live_stream" selected>🟢 LIVE Real-Time GDACS Tropical Cyclone Feed</option>
                             <option value="cyclone_dana">Cyclone Dana (VSCS - Odisha / Dhamra)</option>
                             <option value="cyclone_amphan">Super Cyclone Amphan (West Bengal / Sunderbans)</option>
                             <option value="cyclone_michaung">Cyclone Michaung (Andhra Pradesh / Bapatla)</option>
@@ -1109,8 +1115,8 @@
                         <div style="font-size:12px; font-weight:600; color:var(--cyan); text-transform:uppercase;">Peak Storm Surge Potential</div>
                         <span class="icon-box anim-wave"><i data-lucide="waves" style="width:22px; height:22px; color:var(--cyan);"></i></span>
                     </div>
-                    <div style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">3.85 <span style="font-size:16px; color:#94a3b8;">m Above MSL</span></div>
-                    <div style="font-size:12px; color:var(--cyan);">+1.4m Astronomical Spring Tide Synchronized</div>
+                    <div id="peakSurgeVal" style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">3.85 <span style="font-size:16px; color:#94a3b8;">m Above MSL</span></div>
+                    <div id="surgeSubtitle" style="font-size:12px; color:var(--cyan);">+1.4m Astronomical Spring Tide Synchronized</div>
                 </div>
 
                 <div class="glass-panel" style="padding:20px; border-radius:14px;">
@@ -1118,8 +1124,8 @@
                         <div style="font-size:12px; font-weight:600; color:var(--cyan); text-transform:uppercase;">Grid Failure Probability</div>
                         <span class="icon-box anim-electric"><i data-lucide="zap" style="width:22px; height:22px; color:var(--cyan);"></i></span>
                     </div>
-                    <div style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">64.2% <span style="font-size:16px; color:#94a3b8;">Substations</span></div>
-                    <div style="font-size:12px; color:var(--cyan);">14 High-Voltage Coastal Substations at Severe Risk</div>
+                    <div id="gridFailVal" style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">64.2% <span style="font-size:16px; color:#94a3b8;">Substations</span></div>
+                    <div id="gridFailSubtitle" style="font-size:12px; color:var(--cyan);">14 High-Voltage Coastal Substations at Severe Risk</div>
                 </div>
 
                 <div class="glass-panel" style="padding:20px; border-radius:14px;">
@@ -1127,8 +1133,8 @@
                         <div style="font-size:12px; font-weight:600; color:var(--cyan); text-transform:uppercase;">Parametric SDRF Trigger</div>
                         <span class="icon-box anim-pulse"><i data-lucide="shield-check" style="width:22px; height:22px; color:var(--cyan);"></i></span>
                     </div>
-                    <div style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">$15,000,000</div>
-                    <div style="font-size:12px; color:var(--cyan);">Automatic Disaster Payout Verification Active</div>
+                    <div id="parametricVal" style="font-size:32px; font-family:var(--font-mono); font-weight:800; color:#fff; margin:6px 0;">$15,000,000</div>
+                    <div id="parametricSubtitle" style="font-size:12px; color:var(--cyan);">Automatic Disaster Payout Verification Active</div>
                 </div>
             </div>
 
