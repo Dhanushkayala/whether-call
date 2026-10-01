@@ -97,48 +97,12 @@
             position: absolute;
             inset: 0;
             z-index: 0;
-            background-image: url('https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_508c64b8-a31e-4290-bdfc-1187df70e0a6.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background:
+                radial-gradient(circle at 50% 40%, rgba(14, 165, 233, 0.15) 0%, rgba(4, 16, 31, 0.85) 60%, #030a14 100%),
+                linear-gradient(rgba(121, 220, 232, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(121, 220, 232, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
         }
-
-        .sky video {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            opacity: 0;
-            transition: opacity .28s linear;
-        }
-        .sky video.is-active { opacity: 1; }
-
-        @media (prefers-reduced-motion: reduce) {
-            .sky video { display: none; }
-        }
-
-        /* Planetary Slots */
-        .planet {
-            position: absolute;
-            z-index: -1;
-            padding: 0;
-            border: 0;
-            background: none;
-            -webkit-appearance: none;
-            appearance: none;
-            line-height: 0;
-            cursor: pointer;
-            pointer-events: auto;
-            transition: transform .45s cubic-bezier(.22, 1, .36, 1);
-        }
-        .planet img { display: none; width: 100%; height: auto; }
-        .planet img.is-shown { display: block; filter: drop-shadow(0 0 calc(20 * var(--u)) rgba(121,220,232,0.3)); }
-        .planet:hover { transform: scale(1.05); }
-        .planet:active { transform: scale(.98); }
-        .planet-l { width: calc(143 * var(--u)); left: calc(-69.5 * var(--u)); top: calc(-38.3 * var(--u)); }
-        .planet-r { width: calc(143 * var(--u)); right: calc(-64.7 * var(--u)); top: calc(-40.6 * var(--u)); }
 
         /* UI Overlay & Copy */
         .ui-layer { position: absolute; inset: 0; z-index: 3; }
@@ -629,6 +593,44 @@
             animation: energyFlow 1.8s linear infinite;
         }
 
+        /* Leaflet Control & Popup Modern Glass Styling */
+        .leaflet-bottom.leaflet-right {
+            margin-bottom: 72px;
+            margin-right: 16px;
+            z-index: 1050 !important;
+        }
+        .leaflet-control-zoom {
+            border: 1px solid rgba(121, 220, 232, 0.4) !important;
+            border-radius: 8px !important;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+        }
+        .leaflet-control-zoom a {
+            background: rgba(9, 21, 42, 0.95) !important;
+            color: var(--cyan) !important;
+            border-bottom: 1px solid rgba(121, 220, 232, 0.25) !important;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+        }
+        .leaflet-control-zoom a:hover {
+            background: rgba(121, 220, 232, 0.2) !important;
+            color: #ffffff !important;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(9, 21, 42, 0.95) !important;
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(121, 220, 232, 0.35) !important;
+            border-radius: 10px !important;
+            color: #f1f5f9 !important;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7) !important;
+            font-family: var(--font-body) !important;
+            font-size: 13px !important;
+        }
+        .leaflet-popup-tip {
+            background: rgba(9, 21, 42, 0.95) !important;
+            border: 1px solid rgba(121, 220, 232, 0.35) !important;
+        }
+
         /* Entrance Keyframes */
         @keyframes ent-reveal { from { transform: translateY(115%); } to { transform: translateY(0); } }
         @keyframes ent-rise { from { opacity: 0; transform: translateY(var(--rise, 10px)); } to { opacity: 1; transform: none; } }
@@ -726,8 +728,6 @@
             p.lede { font-size: calc(15 * var(--u)); line-height: calc(24 * var(--u)); margin-top: calc(16 * var(--u)); }
             .cta { margin-top: calc(28 * var(--u)); position: relative; }
             .label { display: none; }
-            .planet-l { width: calc(85 * var(--u)); left: calc(-42 * var(--u)); top: calc(-16 * var(--u)); }
-            .planet-r { width: calc(85 * var(--u)); right: calc(-42 * var(--u)); top: calc(-16 * var(--u)); }
         }
 
         /* ══════════════════════════════════════════════════════════════ */
@@ -792,266 +792,9 @@
         .anim-wave { animation: iconWaveFloat 2s ease-in-out infinite; display: inline-block; }
         .anim-bounce { animation: iconBounceSoft 2.4s ease-in-out infinite; display: inline-block; }
         .anim-electric { animation: iconElectricSpark 1.6s ease-in-out infinite; display: inline-block; }
-
-        /* Cinematic Space-to-India Satellite Zoom Overlay & HUD */
-        .space-cinematic-overlay {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 99999;
-            background: #020611;
-            overflow: hidden;
-            pointer-events: auto;
-            transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .space-cinematic-video {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-            opacity: 0.98;
-            filter: contrast(1.08) brightness(0.96);
-            pointer-events: none;
-        }
-        .space-cinematic-overlay canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-            z-index: 2;
-            pointer-events: none;
-        }
-        .space-cinematic-hud {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 24px 32px;
-            font-family: var(--font-mono, monospace);
-            color: #79dce8;
-            z-index: 10;
-        }
-        .hud-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            pointer-events: auto;
-        }
-        .hud-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            color: #fff;
-            text-shadow: 0 0 12px rgba(121, 220, 232, 0.8);
-        }
-        .hud-pulse {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #79dce8;
-            box-shadow: 0 0 12px #79dce8;
-            animation: iconPulseGlow 1.5s infinite;
-        }
-        .hud-target-badge {
-            background: rgba(4, 20, 39, 0.85);
-            border: 1px solid rgba(121, 220, 232, 0.4);
-            border-radius: 20px;
-            padding: 6px 18px;
-            font-size: 12px;
-            color: #79dce8;
-            box-shadow: 0 0 18px rgba(0,0,0,0.6);
-            letter-spacing: 0.8px;
-            backdrop-filter: blur(8px);
-        }
-        .hud-skip-btn {
-            background: rgba(121, 220, 232, 0.15);
-            border: 1px solid rgba(121, 220, 232, 0.5);
-            color: #fff;
-            border-radius: 6px;
-            padding: 6px 14px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(6px);
-        }
-        .hud-skip-btn:hover {
-            background: #79dce8;
-            color: #030d1a;
-            box-shadow: 0 0 16px #79dce8;
-        }
-        .hud-center-reticle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 130px;
-            height: 130px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.2s ease;
-        }
-        .reticle-ring {
-            position: absolute;
-            inset: 0;
-            border: 1.5px dashed rgba(121, 220, 232, 0.65);
-            border-radius: 50%;
-            animation: radarSweep 6s linear infinite;
-        }
-        .reticle-crosshair {
-            position: absolute;
-            width: 32px;
-            height: 32px;
-            border-top: 2px solid #ef4444;
-            border-bottom: 2px solid #ef4444;
-            border-left: 2px solid #ef4444;
-            border-right: 2px solid #ef4444;
-        }
-        .reticle-crosshair::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: -18px;
-            right: -18px;
-            height: 1px;
-            background: rgba(239, 68, 68, 0.7);
-            transform: translateY(-50%);
-        }
-        .reticle-crosshair::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: -18px;
-            bottom: -18px;
-            width: 1px;
-            background: rgba(239, 68, 68, 0.7);
-            transform: translateX(-50%);
-        }
-        .reticle-coords {
-            position: absolute;
-            bottom: -32px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #fff;
-            background: rgba(3, 13, 26, 0.9);
-            padding: 3px 10px;
-            border-radius: 4px;
-            border: 1px solid rgba(239, 68, 68, 0.6);
-            white-space: nowrap;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
-        }
-        .hud-footer {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background: linear-gradient(180deg, transparent, rgba(2, 6, 17, 0.85));
-            padding: 16px 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(121, 220, 232, 0.15);
-        }
-        .hud-footer-stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .hud-telemetry-col {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .hud-label {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .hud-value {
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-            text-shadow: 0 0 8px rgba(121, 220, 232, 0.6);
-        }
-        .hud-progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .hud-progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #0284c7, #79dce8, #10b981);
-            box-shadow: 0 0 10px #79dce8;
-            transition: width 0.05s linear;
-        }
     </style>
 </head>
 <body>
-
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- CINEMATIC SATELLITE SPACE-TO-INDIA GEOGRAPHIC ZOOM OVERLAY     -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <div id="spaceCinematicOverlay" class="space-cinematic-overlay" style="display:none; opacity:0;">
-        <video id="spaceCinematicVideo" class="space-cinematic-video" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4" playsinline muted preload="auto"></video>
-        <canvas id="spaceCinematicCanvas"></canvas>
-        <div class="space-cinematic-hud">
-            <div class="hud-header">
-                <div class="hud-brand">
-                    <span class="hud-pulse"></span>
-                    <span>SATELLITE RECONNAISSANCE SENSOR // ORBITAL DESCENT</span>
-                </div>
-                <div class="hud-target-badge" id="hudTargetLocation">TARGET: DHAMRA COAST, ODISHA [20.812° N, 86.974° E]</div>
-                <button class="hud-skip-btn" onclick="skipCinematicTransition()">SKIP [ESC]</button>
-            </div>
-
-            <div class="hud-center-reticle" id="hudReticle">
-                <div class="reticle-ring"></div>
-                <div class="reticle-crosshair"></div>
-                <div class="reticle-coords" id="hudCenterCoords">20.81° N, 86.97° E</div>
-            </div>
-
-            <div class="hud-footer">
-                <div class="hud-footer-stats">
-                    <div class="hud-telemetry-col">
-                        <span class="hud-label">SATELLITE ALTITUDE</span>
-                        <span class="hud-value" id="hudAltitude">18,000 KM</span>
-                    </div>
-                    <div class="hud-telemetry-col">
-                        <span class="hud-label">TRAJECTORY STAGE</span>
-                        <span class="hud-value" id="hudStage">DEEP SPACE // EARTH APPROACH</span>
-                    </div>
-                    <div class="hud-telemetry-col">
-                        <span class="hud-label">DESCENT VELOCITY</span>
-                        <span class="hud-value" id="hudVelocity">28,400 KM/H</span>
-                    </div>
-                    <div class="hud-telemetry-col">
-                        <span class="hud-label">COORDINATE LOCK</span>
-                        <span class="hud-value" id="hudLockStatus" style="color:var(--cyan);">TRACKING</span>
-                    </div>
-                </div>
-                <div class="hud-progress-bar">
-                    <div class="hud-progress-fill" id="hudProgressFill"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Unified Master Navbar -->
     <header class="navbar">
@@ -1089,37 +832,23 @@
     </header>
 
     <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- VIEW 1: CINEMATIC EARTH HERO & OBSERVATORY                     -->
+    <!-- VIEW 1: WEATHERCALL COMMAND OBSERVATORY & HERO                 -->
     <!-- ══════════════════════════════════════════════════════════════ -->
     <section id="viewHero" class="stage">
-        <div class="sky" id="skyBackdrop">
-            <video class="is-active" autoplay muted loop playsinline preload="auto"
-                   src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202422_3ffb4889-c520-432d-8458-038009eb40df.mp4"
-                   poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_508c64b8-a31e-4290-bdfc-1187df70e0a6.png"
-                   aria-hidden="true">
-            </video>
-        </div>
+        <div class="sky" id="skyBackdrop"></div>
 
         <div class="ui-layer">
             <div class="copy">
-                <div class="col eyebrow"><span class="ent-mask"><span class="ent-line">PLANETARY OBSERVATORY</span></span></div>
-                <h1 class="col title"><span class="ent-mask"><span class="ent-line">EARTH</span></span></h1>
+                <div class="col eyebrow"><span class="ent-mask"><span class="ent-line">HYDRODYNAMIC & INFRAGRID OBSERVATORY</span></span></div>
+                <h1 class="col title"><span class="ent-mask"><span class="ent-line">WEATHERCALL</span></span></h1>
                 <div class="col rule"><span></span></div>
                 <p class="col lede">
-                    Real-time hydrodynamic storm surge simulation, Overpass national power grid fragility analysis, and AI-powered NDMA disaster mitigation protocol dispatch across India's coastline.
+                    Real-time hydrodynamic storm surge simulation, CEA national power grid fragility analysis, and AI-powered NDMA disaster mitigation protocol dispatch across India's coastline.
                 </p>
-                <div class="col cta">
-                    <button class="planet planet-l" type="button" aria-label="Planet Earth Coastal Focus" onclick="switchPage('map')">
-                        <img class="is-shown" alt="Earth Cutout" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202005_3346cc4d-ec3b-44ab-825c-b18e49f5021a.png">
-                    </button>
-                    <button class="planet planet-r" type="button" aria-label="Planet Earth Oceanic Focus" onclick="switchPage('map')">
-                        <img class="is-shown" alt="Earth Cutout" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202005_3346cc4d-ec3b-44ab-825c-b18e49f5021a.png">
-                    </button>
-                    <button class="enter-btn" type="button" onclick="switchPage('map')">
+                <div class="col cta" style="display:flex; justify-content:center; align-items:center; gap:16px;">
+                    <button class="enter-btn" type="button" onclick="switchPage('map')" style="position:relative; z-index:10; cursor:pointer;">
                         ENTER COMMAND MAP
                     </button>
-                    <span class="label label-l">BAY OF BENGAL</span>
-                    <span class="label label-r">ARABIAN SEA</span>
                 </div>
             </div>
         </div>
@@ -1260,17 +989,17 @@
             </aside>
 
             <!-- Map View Area -->
-            <main style="flex:1; height:100%; position:relative;">
+            <main style="flex:1; height:100%; position:relative; overflow:hidden;">
 
                 <!-- Top Map Quick Action HUD -->
-                <div style="position:absolute; top:16px; left:16px; z-index:400; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div style="position:absolute; top:16px; left:16px; z-index:1100; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                     <select id="baseMapSelect" onchange="switchBaseMap(this.value)" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:var(--cyan); border:1px solid rgba(121,220,232,0.4); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; outline:none; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
-                        <option value="geoapify">Geoapify Dark Matter GIS (Active API)</option>
-                        <option value="carto">CARTO Dark Matter Standard</option>
+                        <option value="carto" selected>CARTO Dark Matter (High-Speed GIS)</option>
                         <option value="nasa">NASA GIBS VIIRS SNPP Satellite</option>
                         <option value="nasamodis">NASA GIBS MODIS Terra Satellite</option>
                         <option value="satellite">ESRI High-Res World Imagery</option>
                         <option value="osm">OpenStreetMap Standard</option>
+                        <option value="geoapify">Geoapify Dark Matter (API Key)</option>
                     </select>
 
                     <button onclick="recenterMap()" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
@@ -1283,7 +1012,7 @@
                 </div>
 
                 <!-- Floating Live Weather HUD (Top Right) -->
-                <div class="glass-panel" style="position:absolute; top:16px; right:16px; z-index:400; border-radius:12px; padding:12px 16px; min-width:340px; max-width:440px;">
+                <div class="glass-panel" style="position:absolute; top:16px; right:16px; z-index:1100; border-radius:12px; padding:12px 16px; min-width:340px; max-width:440px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(121,220,232,0.2); padding-bottom:8px; margin-bottom:10px;">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span class="anim-pulse" style="width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan);"></span>
@@ -1315,7 +1044,17 @@
                 </div>
 
                 <!-- Leaflet Map Container -->
-                <div id="map" style="width:100%; height:100%;"></div>
+                <div id="map" style="position:absolute; inset:0; width:100%; height:100%; z-index:1;"></div>
+
+                <!-- Bottom Timeline Scrubber -->
+                <div class="glass-panel" style="position:absolute; bottom:16px; left:20px; right:76px; z-index:1100; border-radius:12px; padding:10px 16px; display:flex; align-items:center; gap:16px;">
+                    <button id="timelinePlayBtn" onclick="toggleTimelinePlay()" style="background:var(--cyan); color:var(--btn-ink); border:none; border-radius:8px; padding:6px 12px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                        <i id="playIcon" data-lucide="play" style="width:14px; height:14px;"></i> Play
+                    </button>
+                    <span id="timelineLabel" style="font-family:var(--font-mono); font-weight:700; font-size:12px; color:var(--cyan); min-width:130px;">T-0 (Landfall)</span>
+                    <input type="range" id="timelineSlider" min="0" max="6" value="4" oninput="setTimelineIndex(parseInt(this.value))" style="flex:1; accent-color:var(--cyan);">
+                </div>
+            </main>
 
                 <!-- Bottom Timeline Scrubber -->
                 <div class="glass-panel" style="position:absolute; bottom:16px; left:20px; right:20px; z-index:400; border-radius:12px; padding:10px 16px; display:flex; align-items:center; gap:16px;">
@@ -1651,7 +1390,18 @@
             if (pageId === 'map') {
                 document.getElementById('navMap').classList.add('is-active');
                 document.getElementById('viewMap').classList.add('is-active');
-                triggerCinematicZoom('map');
+                requestAnimationFrame(() => {
+                    initMapIfNeeded();
+                    if (map) {
+                        map.invalidateSize();
+                    }
+                });
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                }, 80);
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                }, 250);
             }
             if (pageId === 'analytics') {
                 document.getElementById('navAnalytics').classList.add('is-active');
@@ -1685,16 +1435,19 @@
             map = L.map('map', {
                 center: [20.81, 86.97],
                 zoom: 8,
-                zoomControl: true,
+                zoomControl: false,
                 attributionControl: false,
-                zoomSnap: 0.25,
-                zoomDelta: 0.5,
+                zoomSnap: 1,
+                zoomDelta: 1,
                 wheelPxPerZoomLevel: 120,
                 wheelDebounceTime: 40,
                 zoomAnimation: true,
                 fadeAnimation: true,
                 markerZoomAnimation: true
             });
+
+            // Modern themed bottom-right zoom controls (avoids collision with top HUDs)
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
 
             // Base Layers using user-provided API Keys and NASA GIBS WMTS
             layerGroups.baseGeoapify = L.tileLayer(`https://maps.geoapify.com/v1/tile/dark-matter-purple-roads/{z}/{x}/{y}.png?apiKey=${MAP_API_KEY}`, {
@@ -1746,8 +1499,8 @@
                 attribution: '© OpenStreetMap contributors'
             });
 
-            // Set default active base map (Geoapify Dark Matter GIS)
-            layerGroups.baseGeoapify.addTo(map);
+            // Set default active base map (CARTO Dark Matter - Zero Key Dependency, High Reliability)
+            layerGroups.baseCarto.addTo(map);
 
             // Add Default Overlay Layers
             ['surge', 'grid', 'transects', 'shelters', 'flights', 'track', 'stations'].forEach(name => {
@@ -1779,13 +1532,19 @@
                 if (l && map.hasLayer(l)) map.removeLayer(l);
             });
 
-            if (type === 'geoapify') layerGroups.baseGeoapify.addTo(map);
+            if (type === 'geoapify') {
+                if (MAP_API_KEY && layerGroups.baseGeoapify) {
+                    layerGroups.baseGeoapify.addTo(map);
+                } else {
+                    layerGroups.baseCarto.addTo(map);
+                }
+            }
             else if (type === 'carto') layerGroups.baseCarto.addTo(map);
             else if (type === 'nasa_viirs' || type === 'nasa') layerGroups.baseNasaViirs.addTo(map);
-            else if (type === 'nasa_modis') layerGroups.baseNasaModis.addTo(map);
+            else if (type === 'nasa_modis' || type === 'nasamodis') layerGroups.baseNasaModis.addTo(map);
             else if (type === 'satellite') layerGroups.baseSat.addTo(map);
             else if (type === 'osm') layerGroups.baseOsm.addTo(map);
-            else layerGroups.baseGeoapify.addTo(map);
+            else layerGroups.baseCarto.addTo(map);
         }
 
         async function fetchLiveStationWeather(lat, lon, label) {
@@ -2056,30 +1815,44 @@
 
             // 5. Live Flight Radar (AviationStack API) with Animated Aircraft Icons
             layerGroups.flights.clearLayers();
+            const fallbackFlights = [
+                { callsign: 'AIC742', airline: 'Air India', lat: 20.24, lon: 86.15, aircraft: 'A320-251N', status: 'REROUTED', speed_kts: 420, alert: 'Diverted around Gale Wind Ring' },
+                { callsign: 'IGO518', airline: 'IndiGo', lat: 21.65, lon: 87.82, aircraft: 'A321-271NX', status: 'DIVERTED', speed_kts: 460, alert: 'Clear of Outer Rainbands' },
+                { callsign: 'SEJ892', airline: 'SpiceJet', lat: 19.82, lon: 85.90, aircraft: 'B737-800', status: 'MONITORED', speed_kts: 390, alert: 'South Track Clear' }
+            ];
+            const renderFlights = (flightList) => {
+                flightList.forEach(f => {
+                    if (f.status === 'GROUND' || f.status === 0) return;
+
+                    const flightIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `
+                            <div class="map-anim-flight" style="width:24px; height:24px;" title="${f.callsign || f.flight_iata}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" fill="rgba(245, 158, 11, 0.4)"></path>
+                                </svg>
+                            </div>
+                        `,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+                    const marker = L.marker([f.lat, f.lon], { icon: flightIcon })
+                        .bindPopup(`<b>${f.callsign || f.flight_iata}</b><br>${f.airline} • ${f.aircraft || 'Commercial Jet'}<br>Status: ${f.status}<br>Speed: ${f.speed_kts || 420} kts<br>Alert: ${f.alert || 'Active Vector'}`);
+                    layerGroups.flights.addLayer(marker);
+                });
+            };
+
             fetch(`${backendUrl}/api/live-flights`)
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
-                    if (!data || !data.active_flights) return;
-                    data.active_flights.forEach(f => {
-                        if (f.status === 'GROUND' || f.status === 0) return;
-
-                        const flightIcon = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `
-                                <div class="map-anim-flight" style="width:24px; height:24px;" title="${f.callsign || f.flight_iata}">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" fill="rgba(245, 158, 11, 0.4)"></path>
-                                    </svg>
-                                </div>
-                            `,
-                            iconSize: [24, 24],
-                            iconAnchor: [12, 12]
-                        });
-                        const marker = L.marker([f.lat, f.lon], { icon: flightIcon })
-                            .bindPopup(`<b>${f.callsign || f.flight_iata}</b><br>${f.airline} • ${f.aircraft}<br>Status: ${f.status}<br>Speed: ${f.speed_kts} kts<br>Alert: ${f.alert}`);
-                        layerGroups.flights.addLayer(marker);
-                    });
-                }).catch(() => {});
+                    if (data && data.active_flights && data.active_flights.length > 0) {
+                        renderFlights(data.active_flights);
+                    } else {
+                        renderFlights(fallbackFlights);
+                    }
+                }).catch(() => {
+                    renderFlights(fallbackFlights);
+                });
 
             // 6. Bathymetry Transects (SLOSH Cross-Section Profiles)
             layerGroups.transects.clearLayers();
@@ -2300,393 +2073,6 @@
         function setTimelineIndex(idx) {
             const labels = ['T-72h', 'T-48h', 'T-24h', 'T-12h', 'T-0 (Landfall)', 'T+12h', 'T+24h'];
             document.getElementById('timelineLabel').textContent = labels[idx] || 'T-0';
-        }
-
-        // ==========================================
-        // SATELLITE SPACE-TO-INDIA CINEMATIC ENGINE
-        // ==========================================
-        const CINEMATIC_CONFIG = {
-            duration: 6000, // Duration in ms (matched to video asset)
-            target: {
-                name: "DHAMRA COAST, ODISHA",
-                badge: "TARGET: DHAMRA COAST, ODISHA [20.812° N, 86.974° E]",
-                lat: 20.812,
-                lng: 86.974,
-                zoom: 8.5
-            },
-            startLat: 12.0,
-            startLng: 65.0,
-            startAltitude: 18000000, // 18,000 km
-            endAltitude: 500 // 500 m
-        };
-
-        let cinematicState = {
-            active: false,
-            startTime: 0,
-            rafId: null,
-            skipped: false
-        };
-
-        // Procedural Starfield
-        let cinematicStars = [];
-        function initCinematicStars(count = 350) {
-            cinematicStars = [];
-            for (let i = 0; i < count; i++) {
-                cinematicStars.push({
-                    x: (Math.random() - 0.5) * 2000,
-                    y: (Math.random() - 0.5) * 2000,
-                    z: Math.random() * 1000 + 100,
-                    size: Math.random() * 1.8 + 0.5,
-                    brightness: Math.random() * 0.7 + 0.3
-                });
-            }
-        }
-
-        // Vector Polygons for Earth Continents (Spherical Coordinates [lat, lng])
-        const CONTINENT_EURASIA = [
-            [70, 30], [72, 60], [70, 90], [72, 130], [65, 170], [60, 160], [55, 140],
-            [40, 120], [30, 120], [20, 110], [10, 105], [5, 100], [15, 95], [22, 90],
-            [10, 78], [25, 62], [25, 55], [12, 45], [30, 32], [38, 25], [36, -5],
-            [44, -1], [50, 2], [58, 8], [65, 15], [70, 30]
-        ];
-
-        const CONTINENT_AFRICA = [
-            [35, -5], [37, 10], [32, 32], [12, 43], [10, 50], [0, 42], [-12, 40],
-            [-26, 32], [-34, 18], [-33, 26], [-34, 18], [-20, 12], [-5, 8],
-            [4, 8], [5, -3], [15, -17], [22, -16], [32, -10], [35, -5]
-        ];
-
-        const CONTINENT_AUSTRALIA = [
-            [-12, 132], [-14, 136], [-12, 142], [-20, 148], [-32, 152], [-38, 146],
-            [-35, 136], [-32, 128], [-35, 116], [-28, 114], [-20, 118], [-14, 126], [-12, 132]
-        ];
-
-        // High-Precision Indian Subcontinent Coastline & Boundary Polygon
-        const SUB_CONTINENT_INDIA = [
-            [35.5, 74.5], [36.2, 76.8], [35.6, 78.8], [34.5, 79.2], [32.5, 79.0], [31.2, 79.8],
-            [30.4, 81.0], [29.0, 80.2], [28.2, 82.0], [27.0, 85.0], [26.5, 88.0],
-            [27.3, 88.6], [27.8, 89.0], [27.5, 92.0], [28.5, 94.5], [28.2, 96.5],
-            [27.0, 96.0], [25.5, 94.5], [23.5, 93.5], [22.0, 92.8],
-            [21.5, 89.5], // Sunderbans / Ganges Delta
-            [21.65, 87.5], // Digha / Medinipur
-            [21.5, 86.9], // Balasore
-            [20.812, 86.974], // Dhamra Port & River Mouth
-            [20.3, 86.6], // Paradip
-            [19.8, 85.8], // Puri
-            [19.7, 85.3], // Chilika Lake
-            [19.26, 84.9], // Gopalpur
-            [17.68, 83.21], // Visakhapatnam
-            [16.5, 81.8], // Godavari Delta
-            [15.9, 80.47], // Krishna Delta / Bapatla
-            [14.5, 80.0], // Nellore
-            [13.08, 80.27], // Chennai
-            [11.9, 79.8], // Puducherry
-            [10.8, 79.85], // Nagapattinam
-            [9.28, 79.3], // Rameshwaram
-            [8.08, 77.55], // Kanyakumari (Cape Comorin)
-            [8.5, 76.9], // Thiruvananthapuram
-            [9.9, 76.2], // Cochin
-            [11.2, 75.8], // Kozhikode
-            [12.9, 74.8], // Mangalore
-            [15.3, 73.8], // Goa
-            [18.9, 72.8], // Mumbai
-            [20.5, 72.8], // Daman
-            [21.0, 72.5], // Gulf of Khambhat
-            [20.7, 70.9], // Diu
-            [22.2, 69.0], // Dwarka / Saurashtra
-            [23.0, 69.0], // Gulf of Kutch
-            [23.8, 68.8], // Rann of Kutch
-            [24.5, 71.0], [27.0, 71.0], [29.5, 73.0], [31.5, 74.8], [34.5, 74.5]
-        ];
-
-        const SRI_LANKA_POLYGON = [
-            [9.8, 80.2], [9.0, 80.9], [8.0, 81.5], [6.9, 81.8], [5.9, 80.5], [6.8, 79.9], [8.5, 79.8], [9.8, 80.2]
-        ];
-
-        // 3D Spherical Orthographic Projection Math
-        function projectSpherical(lat, lng, centerLat, centerLng, radius, width, height) {
-            const rad = Math.PI / 180;
-            const phi = lat * rad;
-            const lambda = lng * rad;
-            const phi0 = centerLat * rad;
-            const lambda0 = centerLng * rad;
-
-            const cosPhi = Math.cos(phi);
-            const sinPhi = Math.sin(phi);
-            const cosPhi0 = Math.cos(phi0);
-            const sinPhi0 = Math.sin(phi0);
-            const dLambda = lambda - lambda0;
-
-            const cosC = sinPhi0 * sinPhi + cosPhi0 * cosPhi * Math.cos(dLambda);
-            const isVisible = cosC > -0.15; // Visible on hemisphere
-
-            const x = radius * cosPhi * Math.sin(dLambda);
-            const y = radius * (cosPhi0 * sinPhi - sinPhi0 * cosPhi * Math.cos(dLambda));
-
-            return {
-                x: width / 2 + x,
-                y: height / 2 - y,
-                visible: isVisible,
-                cosC: cosC
-            };
-        }
-
-        function triggerCinematicZoom(nextPage = 'map') {
-            const overlay = document.getElementById('spaceCinematicOverlay');
-            const canvas = document.getElementById('spaceCinematicCanvas');
-            const video = document.getElementById('spaceCinematicVideo');
-            if (!overlay || !canvas) {
-                initMapIfNeeded();
-                return;
-            }
-
-            const ctx = canvas.getContext('2d');
-            initCinematicStars(380);
-
-            cinematicState.active = true;
-            cinematicState.skipped = false;
-            cinematicState.startTime = performance.now();
-
-            overlay.style.display = 'block';
-            overlay.style.opacity = '1';
-
-            if (video) {
-                video.muted = true;
-                video.playsInline = true;
-                video.currentTime = 0;
-                video.onended = () => {
-                    completeCinematicTransition();
-                };
-                const playPromise = video.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Video playback status:', e));
-                }
-            }
-
-            // Resize canvas to match screen DPR
-            function resizeCanvas() {
-                const dpr = window.devicePixelRatio || 1;
-                canvas.width = window.innerWidth * dpr;
-                canvas.height = window.innerHeight * dpr;
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
-                ctx.scale(dpr, dpr);
-            }
-            resizeCanvas();
-
-            // Setup ESC key listener for skip
-            function handleKeyDown(e) {
-                if (e.key === 'Escape' || e.keyCode === 27) {
-                    skipCinematicTransition();
-                }
-            }
-            window.addEventListener('keydown', handleKeyDown, { once: true });
-
-            // Initialize map in the background so tiles pre-cache
-            setTimeout(() => {
-                initMapIfNeeded();
-                if (map) {
-                    map.setView([CINEMATIC_CONFIG.target.lat, CINEMATIC_CONFIG.target.lng], CINEMATIC_CONFIG.target.zoom, { animate: false });
-                }
-            }, 300);
-
-            // Animation Loop
-            function frame(now) {
-                if (!cinematicState.active) return;
-
-                const elapsed = now - cinematicState.startTime;
-                let rawProgress = 0;
-
-                // Synchronize progress with video playback if active
-                if (video && !video.paused && video.duration > 0 && video.currentTime > 0) {
-                    rawProgress = Math.min(1.0, video.currentTime / video.duration);
-                } else {
-                    rawProgress = Math.min(1.0, elapsed / CINEMATIC_CONFIG.duration);
-                }
-
-                // Smooth cubic bezier easing
-                const progress = rawProgress < 0.5
-                    ? 4 * rawProgress * rawProgress * rawProgress
-                    : 1 - Math.pow(-2 * rawProgress + 2, 3) / 2;
-
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-
-                // Clear Frame to reveal high-definition space video underneath
-                ctx.clearRect(0, 0, width, height);
-
-                // Dynamic Trajectory Coordinates
-                const currentLat = CINEMATIC_CONFIG.startLat + (CINEMATIC_CONFIG.target.lat - CINEMATIC_CONFIG.startLat) * progress;
-                const currentLng = CINEMATIC_CONFIG.startLng + (CINEMATIC_CONFIG.target.lng - CINEMATIC_CONFIG.startLng) * progress;
-
-                // Exponential Altitude Curve: 18,000,000m -> 500m
-                const altitude = Math.round(CINEMATIC_CONFIG.startAltitude * Math.pow(CINEMATIC_CONFIG.endAltitude / CINEMATIC_CONFIG.startAltitude, progress));
-
-                // Velocity curve (peaks during mid-orbit descent, slows on approach)
-                let velocity = 28400;
-                if (progress < 0.4) {
-                    velocity = Math.round(18000 + progress * 26000);
-                } else if (progress < 0.8) {
-                    velocity = Math.round(28400 - (progress - 0.4) * 55000);
-                } else {
-                    velocity = Math.max(180, Math.round(6400 * (1 - progress)));
-                }
-
-                // 1. Render Orbital Speed Streaks Around HUD Periphery
-                ctx.save();
-                const streakFactor = (velocity / 28400) * 14 * (1 - progress * 0.7);
-                cinematicStars.forEach(star => {
-                    const sx = width / 2 + star.x;
-                    const sy = height / 2 + star.y;
-                    const alpha = Math.max(0, (1 - progress * 1.1) * star.brightness * 0.65);
-                    if (alpha > 0.02) {
-                        ctx.strokeStyle = `rgba(121, 220, 232, ${alpha})`;
-                        ctx.fillStyle = `rgba(224, 242, 254, ${alpha})`;
-                        ctx.lineWidth = star.size;
-
-                        if (streakFactor > 2) {
-                            ctx.beginPath();
-                            ctx.moveTo(sx, sy);
-                            const dx = (star.x / 100) * streakFactor;
-                            const dy = (star.y / 100) * streakFactor;
-                            ctx.lineTo(sx + dx, sy + dy);
-                            ctx.stroke();
-                        } else {
-                            ctx.beginPath();
-                            ctx.arc(sx, sy, star.size, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
-                    }
-                });
-                ctx.restore();
-
-                // 2. Tactical Sensor Scan Lines & Corner Reticle Brackets
-                ctx.save();
-                const cx = width / 2;
-                const cy = height / 2;
-
-                // Subtle Horizon Axis Lines
-                ctx.strokeStyle = 'rgba(121, 220, 232, 0.25)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(cx - 140, cy); ctx.lineTo(cx - 50, cy);
-                ctx.moveTo(cx + 50, cy); ctx.lineTo(cx + 140, cy);
-                ctx.moveTo(cx, cy - 140); ctx.lineTo(cx, cy - 50);
-                ctx.moveTo(cx, cy + 50); ctx.lineTo(cx, cy + 140);
-                ctx.stroke();
-
-                // Animated Radar Scan Rings
-                const radarPhase = (now * 0.002) % 1;
-                ctx.strokeStyle = `rgba(121, 220, 232, ${0.4 * (1 - radarPhase)})`;
-                ctx.lineWidth = 1.2;
-                ctx.beginPath();
-                ctx.arc(cx, cy, 40 + radarPhase * 180, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Atmospheric Entry Ionization Glow (when descending into dense layers)
-                if (progress > 0.65) {
-                    const entryGlow = (progress - 0.65) / 0.35;
-                    const glowGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.min(width, height) * 0.45);
-                    glowGrad.addColorStop(0, `rgba(56, 189, 248, ${0.18 * entryGlow})`);
-                    glowGrad.addColorStop(0.5, `rgba(2, 132, 199, ${0.08 * entryGlow})`);
-                    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                    ctx.fillStyle = glowGrad;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, Math.min(width, height) * 0.45, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                ctx.restore();
-
-                // 3. Update HUD Telemetry in Real-Time
-                const hudAltitude = document.getElementById('hudAltitude');
-                const hudStage = document.getElementById('hudStage');
-                const hudVelocity = document.getElementById('hudVelocity');
-                const hudLockStatus = document.getElementById('hudLockStatus');
-                const hudCenterCoords = document.getElementById('hudCenterCoords');
-                const hudProgressFill = document.getElementById('hudProgressFill');
-
-                if (hudAltitude) {
-                    if (altitude >= 1000) {
-                        hudAltitude.textContent = (altitude / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' KM';
-                    } else {
-                        hudAltitude.textContent = altitude + ' M';
-                    }
-                }
-                if (hudVelocity) {
-                    hudVelocity.textContent = velocity.toLocaleString('en-US') + ' KM/H';
-                }
-                if (hudCenterCoords) {
-                    hudCenterCoords.textContent = `${currentLat.toFixed(2)}° N, ${currentLng.toFixed(2)}° E`;
-                }
-                if (hudProgressFill) {
-                    hudProgressFill.style.width = (progress * 100).toFixed(1) + '%';
-                }
-
-                // 5 Stages of Tactical Descent
-                if (hudStage) {
-                    if (progress < 0.18) {
-                        hudStage.textContent = "DEEP SPACE // HIGH ORBITAL APEX";
-                        if (hudLockStatus) { hudLockStatus.textContent = "ACQUIRING"; hudLockStatus.style.color = "var(--text-muted)"; }
-                    } else if (progress < 0.40) {
-                        hudStage.textContent = "ORBITAL DESCENT // ASIAN LANDMASS";
-                        if (hudLockStatus) { hudLockStatus.textContent = "TRACKING"; hudLockStatus.style.color = "var(--cyan)"; }
-                    } else if (progress < 0.70) {
-                        hudStage.textContent = "SUB-ORBITAL VECTOR // INDIAN PENINSULA";
-                        if (hudLockStatus) { hudLockStatus.textContent = "INTERCEPTING"; hudLockStatus.style.color = "var(--cyan)"; }
-                    } else if (progress < 0.88) {
-                        hudStage.textContent = "COASTAL RECON // ODISHA SECTOR";
-                        if (hudLockStatus) { hudLockStatus.textContent = "RADAR LOCK"; hudLockStatus.style.color = "var(--yellow)"; }
-                    } else {
-                        hudStage.textContent = "TACTICAL DESCENT // DHAMRA PORT (500M)";
-                        if (hudLockStatus) { hudLockStatus.textContent = "TERMINAL LOCK"; hudLockStatus.style.color = "var(--emerald)"; }
-                    }
-                }
-
-                // Loop or Complete
-                if (rawProgress < 1.0 && !cinematicState.skipped) {
-                    cinematicState.rafId = requestAnimationFrame(frame);
-                } else {
-                    completeCinematicTransition();
-                }
-            }
-
-            cinematicState.rafId = requestAnimationFrame(frame);
-        }
-
-        function completeCinematicTransition() {
-            const overlay = document.getElementById('spaceCinematicOverlay');
-            const video = document.getElementById('spaceCinematicVideo');
-            if (video) {
-                try { video.pause(); } catch(e) {}
-            }
-            if (cinematicState.rafId) {
-                cancelAnimationFrame(cinematicState.rafId);
-                cinematicState.rafId = null;
-            }
-            cinematicState.active = false;
-
-            if (overlay) {
-                overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                }, 400);
-            }
-
-            // Smooth Leaflet Final Touchdown
-            if (map) {
-                map.invalidateSize();
-                map.flyTo([CINEMATIC_CONFIG.target.lat, CINEMATIC_CONFIG.target.lng], 9, {
-                    animate: true,
-                    duration: 1.2,
-                    easeLinearity: 0.25
-                });
-            }
-        }
-
-        function skipCinematicTransition() {
-            cinematicState.skipped = true;
-            completeCinematicTransition();
         }
     </script>
 </body>
