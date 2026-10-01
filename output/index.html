@@ -1015,7 +1015,6 @@
                         <option value="nasamodis">NASA GIBS MODIS Terra Satellite</option>
                         <option value="satellite">ESRI High-Res World Imagery</option>
                         <option value="osm">OpenStreetMap Standard</option>
-                        <option value="geoapify">Geoapify Dark Matter (API Key)</option>
                     </select>
 
                     <button onclick="recenterMap()" style="background:rgba(9,21,42,0.95); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(121,220,232,0.3); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
@@ -1291,7 +1290,6 @@
 
         // Dynamic Key Store (Resolved securely via backend /api/config or runtime storage)
         let MAP_API_KEY = localStorage.getItem('MAP_API_KEY') || '';
-        let NASA_API_KEY = localStorage.getItem('NASA_API_KEY') || '';
         let AVIATION_API_KEY = localStorage.getItem('AVIATION_API_KEY') || '';
         let GOOGLE_API_KEY = localStorage.getItem('GOOGLE_API_KEY') || '';
 
@@ -1475,14 +1473,7 @@
             // Modern themed bottom-right zoom controls (avoids collision with top HUDs)
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            // Base Layers using user-provided API Keys and NASA GIBS WMTS
-            layerGroups.baseGeoapify = L.tileLayer(`https://maps.geoapify.com/v1/tile/dark-matter-purple-roads/{z}/{x}/{y}.png?apiKey=${MAP_API_KEY}`, {
-                maxZoom: 19,
-                updateWhenZooming: false,
-                updateWhenIdle: true,
-                keepBuffer: 6,
-                attribution: '© Geoapify © OpenStreetMap'
-            });
+            // Base Layers (High Reliability, Zero API Key Dependency)
             layerGroups.baseCarto = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 19,
                 updateWhenZooming: false,
@@ -1547,7 +1538,6 @@
         function switchBaseMap(type) {
             if (!map) return;
             [
-                layerGroups.baseGeoapify,
                 layerGroups.baseCarto,
                 layerGroups.baseNasaViirs,
                 layerGroups.baseNasaModis,
@@ -1558,14 +1548,7 @@
                 if (l && map.hasLayer(l)) map.removeLayer(l);
             });
 
-            if (type === 'geoapify') {
-                if (MAP_API_KEY && layerGroups.baseGeoapify) {
-                    layerGroups.baseGeoapify.addTo(map);
-                } else {
-                    layerGroups.baseCarto.addTo(map);
-                }
-            }
-            else if (type === 'carto') layerGroups.baseCarto.addTo(map);
+            if (type === 'carto') layerGroups.baseCarto.addTo(map);
             else if (type === 'nasa_viirs' || type === 'nasa') layerGroups.baseNasaViirs.addTo(map);
             else if (type === 'nasa_modis' || type === 'nasamodis') layerGroups.baseNasaModis.addTo(map);
             else if (type === 'satellite') layerGroups.baseSat.addTo(map);
