@@ -18,10 +18,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <!-- Chart.js & Lucide Icons & html2pdf -->
+    <!-- Chart.js & Lucide Icons & html2pdf & Three.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- Blocking animation setup -->
     <script>
@@ -102,6 +103,21 @@
                 linear-gradient(rgba(121, 220, 232, 0.04) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(121, 220, 232, 0.04) 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
+            overflow: hidden;
+        }
+
+        .earth-rotator {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.55;
+            mix-blend-mode: screen;
+        }
+        .earth-rotator canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
         /* UI Overlay & Copy */
@@ -835,7 +851,9 @@
     <!-- VIEW 1: WEATHERCALL COMMAND OBSERVATORY & HERO                 -->
     <!-- ══════════════════════════════════════════════════════════════ -->
     <section id="viewHero" class="stage">
-        <div class="sky" id="skyBackdrop"></div>
+        <div class="sky" id="skyBackdrop">
+            <div id="earthContainer" class="earth-rotator"></div>
+        </div>
 
         <div class="ui-layer">
             <div class="copy">
@@ -1359,6 +1377,7 @@
 
             checkBackendHealth();
             fetchRuntimeConfig();
+            try { initEarthRotator(); } catch (e) { console.warn('Earth rotator init note:', e); }
         });
 
         // Backend Health Probe
@@ -1378,11 +1397,193 @@
             }
         }
 
+        // Earth Rotation Animation (Three.js) — lifecycle managed with view
+        let earthScene = null, earthFrameId = null;
+
+        function initEarthRotator() {
+            const container = document.getElementById('earthContainer');
+            if (!container || !window.THREE) return;
+
+            const w = () => container.clientWidth || container.offsetWidth || 1;
+            const h = () => container.clientHeight || container.offsetHeight || 1;
+
+            const scene = new THREE.Scene();
+            scene.background = null; // transparent so .sky gradient shows through
+            const camera = new THREE.PerspectiveCamera(45, w() / h(), 0.1, 200);
+            camera.position.z = 3.2;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+            renderer.setPixelRatio(window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : (window.devicePixelRatio || 1));
+            renderer.setSize(w(), h());
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+
+            // Starry backdrop
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 800;
+            const starVertices = [];
+            for (let i = 0; i < starCount; i++) {
+                starVertices.push((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
+            }
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            const starMaterial = new THREE.PointsMaterial({ color: 0x79dce8, size: 0.45, transparent: true, opacity: 0.55, sizeAttenuation: true });
+            scene.add(new THREE.Points(starGeometry, starMaterial));
+
+            // Earth sphere with fallback texture; procedural clouds as second layer
+            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+            const earthMaterials = [];
+
+            // Night lights layer (dark continents glow)
+            const nightLoader = new THREE.TextureLoader();
+            nightLoader.load(
+                'https://cdn.jsdelivr.net/gh/unsedded/earth-night-lights@main/earth_nightmap.jpg',
+                tex => { tex.minFilter = THREE.LinearFilter; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; },
+                undefined,
+                () => {
+                    // Fallback: solid dark-blue with subtle vertex color variation
+                    const darkMat = new THREE.MeshPhongMaterial({ color: 0x0a1f3c });
+                    if (!earthMaterials[0]) {
+                        earthMaterials[0] = darkMat;
+                        earthMesh.material = darkMat;
+                    }
+                }
+            );
+
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                color: 0x0c235b,
+                emissive: 0x0a1f3c,
+                emissiveIntensity: 0.35,
+                shininess: 5
+            });
+
+            const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+            scene.add(earthMesh);
+
+            // Atmosphere / Fresnel rim glow
+            const glowGeometry = new THREE.SphereGeometry(1.045, 64, 64);
+            const glowMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    c: { value: 0.18 },
+                    p: { value: 0.75 },
+                    glowColor: { value: new THREE.Color(0x5fd0e1) },
+                    opacity: { value: 0.55 }
+                },
+                vertexShader: `
+                    uniform float c;
+                    uniform float p;
+                    varying float intensity;
+                    void main() {
+                        vec3 pos = normalize(pos = position - vec3(0, 0, 0));
+                        intensity = pow(c - dot(vUv, vec3(0,0,1)), p);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 glowColor;
+                    uniform float opacity;
+                    varying float intensity;
+                    void main() {
+                        gl_FragColor = vec4(glowColor * intensity, opacity * intensity);
+                    }
+                `,
+                blending: THREE.AdditiveBlending,
+                side: THREE.FrontSide,  // changed from BackSide to FrontSide for rim
+                depthWrite: false,
+                transparent: true
+            });
+
+            // Simpler rim shader (BackSide) to avoid the vertex shader bug above
+            const rimGeometry = new THREE.SphereGeometry(1.055, 64, 64);
+            const rimMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    rimColor: { value: new THREE.Color(0x5fd0e1) },
+                    rimPower: { value: 2.5 }
+                },
+                vertexShader: `
+                    varying float vRim;
+                    void main() {
+                        vec3 worldNormal = normalize(mat3(modelMatrix) * normal);
+                        vec3 viewDirection = normalize(cameraPosition - (modelMatrix * vec4(position, 1.0)).xyz);
+                        vRim = 1.0 - max(dot(viewDirection, worldNormal), 0.0);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 rimColor;
+                    varying float vRim;
+                    void main() {
+                        gl_FragColor = vec4(rimColor, vRim * 0.55);
+                    }
+                `,
+                blending: THREE.AdditiveBlending,
+                side: THREE.BackSide,
+                depthWrite: false,
+                transparent: true
+            });
+
+            const earthGlow = new THREE.Mesh(rimGeometry, rimMaterial);
+            scene.add(earthGlow);
+
+            // Ambient + directional lighting
+            scene.add(new THREE.AmbientLight(0x404060, 0.7));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+            sun.position.set(-2, 1, 3);
+            scene.add(sun);
+
+            let rotationVelocity = 0.0018;
+            let paused = false;
+
+            const onResize = () => {
+                const ww = w(), hh = h();
+                renderer.setSize(ww, hh);
+                camera.aspect = ww / hh;
+                camera.updateProjectionMatrix();
+            };
+            window.addEventListener('resize', onResize);
+
+            const animate = () => {
+                if (paused) return;
+                earthFrameId = requestAnimationFrame(animate);
+                earthMesh.rotation.y += rotationVelocity;
+                earthGlow.rotation.y += rotationVelocity;
+                renderer.render(scene, camera);
+            };
+
+            earthScene = { scene, camera, renderer, animate, pause: () => { paused = true; }, resume: () => { paused = false; earthFrameId = requestAnimationFrame(animate); } };
+            animate();
+        }
+
+        function pauseEarth() {
+            if (earthScene) {
+                cancelAnimationFrame(earthFrameId);
+                earthScene.pause();
+            }
+        }
+
+        function resumeEarth() {
+            if (earthScene) {
+                earthScene.resume();
+            }
+        }
+
         // View Navigation Switcher
         function switchPage(pageId) {
             activePage = pageId;
             document.querySelectorAll('.page-view').forEach(el => el.classList.remove('is-active'));
             document.getElementById('viewHero').style.display = (pageId === 'hero') ? 'block' : 'none';
+
+            // Earth animation lifecycle: pause when leaving hero, resume when returning
+            if (pageId === 'hero') {
+                requestAnimationFrame(() => {
+                    if (!earthScene) {
+                        initEarthRotator();
+                    } else {
+                        resumeEarth();
+                    }
+                });
+            } else {
+                pauseEarth();
+            }
 
             // Nav Tabs Highlight
             document.querySelectorAll('.links button').forEach(btn => btn.classList.remove('is-active'));
